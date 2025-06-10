@@ -4,6 +4,8 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: gotify-mcp
+    labels:
+      - com.centurylinklabs.watchtower.enable=false
     ports:
       - "${GOTIFY_MCP_PORT:-9158}:${GOTIFY_MCP_PORT:-9158}"
     env_file:
