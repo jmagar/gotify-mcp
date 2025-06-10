@@ -1,0 +1,28 @@
+services:
+  gotify-mcp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gotify-mcp
+    ports:
+      - "${GOTIFY_MCP_PORT:-9158}:${GOTIFY_MCP_PORT:-9158}"
+    env_file:
+      - .env
+    volumes:
+      - gotify-logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - gotify-mcp-network
+
+volumes:
+  gotify-logs:
+
+networks:
+  gotify-mcp-network:
+    driver: bridge 
