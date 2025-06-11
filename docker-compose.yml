@@ -11,7 +11,7 @@ services:
     env_file:
       - .env
     volumes:
-      - gotify-logs:/app/logs
+      - /mnt/cache/appdata/gotify-mcp/logs:/app/logs
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9158/health"]
@@ -20,11 +20,8 @@ services:
       retries: 3
       start_period: 30s
     networks:
-      - gotify-mcp-network
-
-volumes:
-  gotify-logs:
+      - jakenet
 
 networks:
-  gotify-mcp-network:
-    driver: bridge 
+  jakenet:
+    external: true 
