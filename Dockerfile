@@ -31,16 +31,16 @@ RUN mkdir -p /app/logs && chown -R mcpuser:mcpuser /app
 USER mcpuser
 
 # Expose port
-EXPOSE 8000
+EXPOSE 9158
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
-    CMD curl -f http://localhost:8000/health || exit 1
+    CMD curl -f http://localhost:${GOTIFY_MCP_PORT:-9158}/health || exit 1
 
-# Set default environment variables
+# Set default environment variables (will be overridden by .env)
 ENV GOTIFY_MCP_HOST=0.0.0.0
-ENV GOTIFY_MCP_PORT=8000
-ENV GOTIFY_MCP_TRANSPORT=sse
+ENV GOTIFY_MCP_PORT=9158
+ENV GOTIFY_MCP_TRANSPORT=http
 
 # Run the server via entrypoint
 CMD ["./entrypoint.sh"] 

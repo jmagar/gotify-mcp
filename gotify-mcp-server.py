@@ -2,7 +2,7 @@
 MCP Server for Gotify
 Implements the approved tool set from the design phase.
 Built with FastMCP following best practices from gofastmcp.com
-Transport: SSE
+Transport: HTTP (streamable)
 """
 
 import os
@@ -70,7 +70,7 @@ GOTIFY_CLIENT_TOKEN = os.getenv("GOTIFY_CLIENT_TOKEN")
 GOTIFY_APP_TOKEN_FROM_ENV = os.getenv("GOTIFY_APP_TOKEN")
 # For logging purposes only
 # Transport Config
-GOTIFY_MCP_TRANSPORT = os.getenv("GOTIFY_MCP_TRANSPORT", "sse").lower()
+GOTIFY_MCP_TRANSPORT = os.getenv("GOTIFY_MCP_TRANSPORT", "http").lower()
 GOTIFY_MCP_HOST = os.getenv("GOTIFY_MCP_HOST", "0.0.0.0")
 GOTIFY_MCP_PORT = int(os.getenv("GOTIFY_MCP_PORT", "8000"))
 
@@ -96,7 +96,8 @@ mcp = FastMCP(
     instructions="""This server provides tools to interact with a Gotify instance.
 You can send messages, manage applications, clients, and retrieve information like health and version.
 For sending messages, an `app_token` is required per call.
-For management tasks, a `GOTIFY_CLIENT_TOKEN` must be configured in the server's environment."""
+For management tasks, a `GOTIFY_CLIENT_TOKEN` must be configured in the server's environment.""",
+    log_level=GOTIFY_LOG_LEVEL_STR.lower() if GOTIFY_LOG_LEVEL_STR else "info"
 )
 
 # --- HTTP Client Utility ---
@@ -381,6 +382,17 @@ if __name__ == "__main__":
             # Standard MCP path for SSE
             # allow_introspection=True # Consider for debugging, but disable for production
         )
+    elif GOTIFY_MCP_TRANSPORT == "http":
+        logger.info(f"Starting HTTP transport on {GOTIFY_MCP_HOST}:{GOTIFY_MCP_PORT}")
+        logger.info("HTTP transport will use path: /mcp")
+        mcp.run(
+            transport="http",
+            host=GOTIFY_MCP_HOST,
+            port=GOTIFY_MCP_PORT,
+            path="/mcp",
+            log_level=GOTIFY_LOG_LEVEL_STR.lower() if GOTIFY_LOG_LEVEL_STR else "info"
+            # allow_introspection=True # Consider for debugging, but disable for production
+        )
     else:
-        logger.error(f"Invalid GOTIFY_MCP_TRANSPORT: '{GOTIFY_MCP_TRANSPORT}'. Must be 'stdio' or 'sse'. Defaulting to stdio.")
+        logger.error(f"Invalid GOTIFY_MCP_TRANSPORT: '{GOTIFY_MCP_TRANSPORT}'. Must be 'stdio', 'sse', or 'http'. Defaulting to stdio.")
         mcp.run()

@@ -72,9 +72,10 @@ The `create_message` tool specifically requires an `app_token` parameter, as per
     GOTIFY_API_URL="YOUR_GOTIFY_SERVER_URL" # e.g., http://localhost:80 or https://gotify.example.com
     GOTIFY_CLIENT_TOKEN="YOUR_GOTIFY_ADMIN_CLIENT_TOKEN" # A client token with permissions to manage apps/messages
 
-    # Optional: SSE server configuration
-    # GOTIFY_MCP_HOST="0.0.0.0" # Host for the MCP SSE server to listen on
-    # GOTIFY_MCP_PORT="8000"    # Port for the MCP SSE server
+    # Optional: HTTP server configuration
+    # GOTIFY_MCP_TRANSPORT="http" # Transport type: 'http', 'sse', or 'stdio' (default: http)
+    # GOTIFY_MCP_HOST="0.0.0.0" # Host for the MCP HTTP server to listen on
+    # GOTIFY_MCP_PORT="8000"    # Port for the MCP HTTP server
 
     # Optional: Logging configuration
     # LOG_LEVEL="INFO" # Can be DEBUG, INFO, WARNING, ERROR, CRITICAL
@@ -88,12 +89,12 @@ Execute the Python script:
 ```bash
 python gotify_mcp_server.py
 ```
-By default, the server will start an SSE service on `http://0.0.0.0:8000/mcp`.
+By default, the server will start an HTTP service on `http://0.0.0.0:8000/mcp`.
 You should see log output indicating the server has started.
 
 ## Client Configuration
 
-This server runs using SSE (Server-Sent Events). You can connect to it using any MCP client that supports SSE, such as Cline or a custom script using `fastmcp-client`.
+This server runs using HTTP (streamable) transport by default. You can connect to it using any MCP client that supports HTTP transport, such as Cline or a custom script using `fastmcp-client`. The transport can be configured via the `GOTIFY_MCP_TRANSPORT` environment variable to use 'http', 'sse', or 'stdio'.
 
 **Example Cline Configuration (`cline_mcp_settings.json`):**
 

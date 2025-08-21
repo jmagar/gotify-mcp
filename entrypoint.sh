@@ -17,7 +17,7 @@ fi
 # Set defaults for MCP server configuration
 export GOTIFY_MCP_HOST=${GOTIFY_MCP_HOST:-"0.0.0.0"}
 export GOTIFY_MCP_PORT=${GOTIFY_MCP_PORT:-"9158"}
-export GOTIFY_MCP_TRANSPORT=${GOTIFY_MCP_TRANSPORT:-"sse"}
+export GOTIFY_MCP_TRANSPORT=${GOTIFY_MCP_TRANSPORT:-"http"}
 export GOTIFY_LOG_LEVEL=${GOTIFY_LOG_LEVEL:-"INFO"}
 
 echo "Gotify MCP Service: Configuration validated"
