@@ -38,31 +38,24 @@ The `create_message` tool specifically requires an `app_token` parameter, as per
 ## Quick Start
 
 ### Prerequisites
-- Python 3.8+
+- Python 3.10+
+- [uv](https://docs.astral.sh/uv/) package manager
 - A running Gotify server instance.
 
 ### Installation
 
-1.  **Clone or download the server files:**
-    Place `gotify_mcp_server.py`, `requirements.txt`, and `.env.example` in a directory (e.g., `gotify-mcp`).
-
-2.  **Navigate to the server directory:**
+1.  **Clone the repository:**
     ```bash
-    cd path/to/gotify-mcp
+    git clone https://github.com/jmagar/gotify-mcp
+    cd gotify-mcp
     ```
 
-3.  **Create a virtual environment (recommended):**
+2.  **Install dependencies:**
     ```bash
-    python -m venv .venv
-    source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+    uv sync
     ```
 
-4.  **Install dependencies:**
-    ```bash
-    pip install -r requirements.txt
-    ```
-
-5.  **Set up environment variables:**
+3.  **Set up environment variables:**
     Copy the example environment file:
     ```bash
     cp .env.example .env

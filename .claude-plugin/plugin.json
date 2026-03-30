@@ -1,0 +1,38 @@
+{
+  "name": "gotify-mcp",
+  "version": "1.0.0",
+  "description": "Gotify push notifications and management via MCP tools with HTTP fallback. Sends alerts for long-running tasks, plan completions, and blocked states.",
+  "author": {
+    "name": "Jacob Magar"
+  },
+  "repository": "https://github.com/jmagar/gotify-mcp",
+  "license": "MIT",
+  "keywords": ["gotify", "notifications", "push", "homelab", "mcp"],
+  "userConfig": {
+    "gotify_mcp_url": {
+      "type": "string",
+      "title": "Gotify MCP Server URL",
+      "description": "URL of the gotify-mcp MCP server. Default http://localhost:9158 works if running via docker compose in this repo. Change if running on a different host or port.",
+      "default": "http://localhost:9158",
+      "sensitive": false
+    },
+    "gotify_url": {
+      "type": "string",
+      "title": "Gotify Server URL",
+      "description": "Base URL of your Gotify server, e.g. http://gotify or https://gotify.example.com. No trailing slash.",
+      "sensitive": true
+    },
+    "gotify_app_token": {
+      "type": "string",
+      "title": "Gotify App Token",
+      "description": "Gotify application token for sending messages. Found in Gotify UI under Settings → Apps → Create Application.",
+      "sensitive": true
+    },
+    "gotify_client_token": {
+      "type": "string",
+      "title": "Gotify Client Token",
+      "description": "Gotify client token for management operations (list messages, manage apps/clients). Found in Gotify UI under Settings → Clients.",
+      "sensitive": true
+    }
+  }
+}

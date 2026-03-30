@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "gotify-mcp": {
+      "type": "http",
+      "url": "${user_config.gotify_mcp_url}/mcp"
+    }
+  }
+}
