@@ -1,46 +1,32 @@
 FROM python:3.11-slim
 
-# Set working directory
-WORKDIR /app
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
-# Create a non-root user
 RUN groupadd --gid 1000 mcpuser && \
     useradd --uid 1000 --gid mcpuser --shell /bin/bash --create-home mcpuser
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements first for better layer caching
-COPY pyproject.toml ./
+WORKDIR /app
 
-# Install Python dependencies
-RUN pip install --no-cache-dir -e .
+COPY pyproject.toml uv.lock ./
+RUN uv sync --frozen --no-dev
 
-# Copy application code
 COPY . .
 
-# Make entrypoint executable
-RUN chmod +x entrypoint.sh
+RUN chmod +x entrypoint.sh && \
+    mkdir -p /app/logs && \
+    chown -R mcpuser:mcpuser /app
 
-# Create logs directory
-RUN mkdir -p /app/logs && chown -R mcpuser:mcpuser /app
-
-# Switch to non-root user
 USER mcpuser
 
-# Expose port
 EXPOSE 9158
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
-    CMD curl -f http://localhost:${GOTIFY_MCP_PORT:-9158}/health || exit 1
-
-# Set default environment variables (will be overridden by .env)
 ENV GOTIFY_MCP_HOST=0.0.0.0
 ENV GOTIFY_MCP_PORT=9158
 ENV GOTIFY_MCP_TRANSPORT=http
 
-# Run the server via entrypoint
-CMD ["./entrypoint.sh"] 
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+    CMD curl -f http://localhost:${GOTIFY_MCP_PORT:-9158}/health || exit 1
+
+CMD ["./entrypoint.sh"]

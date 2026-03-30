@@ -26,4 +26,8 @@ esac
 
 if [ "$touched_env" = true ]; then
   chmod 600 "$ENV_FILE"
+  # Also secure any backups created mid-session
+  for bak in "${CLAUDE_PLUGIN_ROOT}"/.env.bak.*; do
+    [ -f "$bak" ] && chmod 600 "$bak"
+  done
 fi

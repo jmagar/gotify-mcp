@@ -28,7 +28,12 @@ done
 # Always enforce restrictive permissions — credentials must not be world-readable
 chmod 600 "$ENV_FILE"
 
-# Lock down any backup files created by rotation (e.g. .env.bak.*)
-for bak in "${CLAUDE_PLUGIN_ROOT}"/.env.bak.*; do
-  [ -f "$bak" ] && chmod 600 "$bak"
+# Lock down backup files and prune to keep only the 3 most recent
+mapfile -t baks < <(ls -t "${CLAUDE_PLUGIN_ROOT}"/.env.bak.* 2>/dev/null)
+for bak in "${baks[@]}"; do
+  chmod 600 "$bak"
+done
+# Delete oldest beyond the 3-backup limit
+for bak in "${baks[@]:3}"; do
+  rm -f "$bak"
 done

@@ -1,7 +1,7 @@
 [project]
-name = "yarr-mcp"
+name = "gotify-mcp"
 version = "0.1.0"
-description = "A collection of MCP servers for the ARRs"
+description = "MCP server for Gotify push notifications"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
@@ -13,7 +13,7 @@ dependencies = [
 ]
 
 [project.scripts]
-plex-mcp-server = "plex_mcp.server:main"
+gotify-mcp-server = "gotify_mcp.server:main"
 
 [build-system]
 requires = ["setuptools>=61.0"]
