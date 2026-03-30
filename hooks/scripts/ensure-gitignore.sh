@@ -8,6 +8,8 @@ REQUIRED=(
   ".env"
   ".env.*"
   "!.env.example"
+  "backups/*"
+  "!backups/.gitkeep"
 )
 
 touch "$GITIGNORE"

@@ -15,6 +15,8 @@ wheels/
 *.log
 logs/*
 !logs/.gitkeep
+backups/*
+!backups/.gitkeep
 
 .bivvy
 .cursor

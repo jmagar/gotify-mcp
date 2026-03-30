@@ -2,6 +2,8 @@
 set -euo pipefail
 
 ENV_FILE="${CLAUDE_PLUGIN_ROOT}/.env"
+BACKUP_DIR="${CLAUDE_PLUGIN_ROOT}/backups"
+mkdir -p "$BACKUP_DIR"
 
 # Credentials from userConfig, exported automatically as CLAUDE_PLUGIN_OPTION_* vars
 declare -A MANAGED=(
@@ -13,6 +15,11 @@ declare -A MANAGED=(
 
 # Create .env if it doesn't exist
 touch "$ENV_FILE"
+
+# Backup before modifying — only if .env has content
+if [ -s "$ENV_FILE" ]; then
+  cp "$ENV_FILE" "${BACKUP_DIR}/.env.bak.$(date +%s)"
+fi
 
 # Update existing line or append — skip empty values to avoid clobbering
 for key in "${!MANAGED[@]}"; do
@@ -29,7 +36,7 @@ done
 chmod 600 "$ENV_FILE"
 
 # Lock down backup files and prune to keep only the 3 most recent
-mapfile -t baks < <(ls -t "${CLAUDE_PLUGIN_ROOT}"/.env.bak.* 2>/dev/null)
+mapfile -t baks < <(ls -t "${BACKUP_DIR}"/.env.bak.* 2>/dev/null)
 for bak in "${baks[@]}"; do
   chmod 600 "$bak"
 done
