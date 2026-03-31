@@ -17,32 +17,77 @@ description: This skill should be used when the user asks to "send notification"
 
 ---
 
-## Mode Detection
+## Tools
 
-This skill has two execution modes. **Always prefer MCP mode.** Fall back to HTTP only when MCP tools are unavailable.
+This skill exposes two MCP tools: `gotify` (action router) and `gotify_help`.
 
-**MCP mode** (preferred): Use when `mcp__gotify-mcp__*` tools are available in your toolkit. These tools communicate with the running gotify-mcp server, which handles all Gotify API auth internally.
+### `gotify` — Action Router
 
-**HTTP fallback mode**: Use when MCP tools are not loaded (server not running, plugin not connected). Credentials are available as `$CLAUDE_PLUGIN_OPTION_GOTIFY_URL`, `$CLAUDE_PLUGIN_OPTION_GOTIFY_APP_TOKEN`, `$CLAUDE_PLUGIN_OPTION_GOTIFY_CLIENT_TOKEN` in any Bash subprocess. Note: sensitive credentials (`gotify_url`, `gotify_app_token`, `gotify_client_token`) are not available as `${user_config.*}` in skill content — they are only accessible as `$CLAUDE_PLUGIN_OPTION_*` environment variables in Bash subprocesses. Do not attempt `${user_config.gotify_url}` syntax in curl commands.
+Manages Gotify push notifications, messages, applications, clients, and server info through a unified action+subaction interface.
+
+```
+gotify(action, subaction, **params)
+```
+
+**Always prefer MCP mode** (`gotify(...)` tool calls). Fall back to HTTP only when MCP tools are unavailable.
 
 **MCP URL**: `${user_config.gotify_mcp_url}`
 
 ---
 
-## MCP Mode — Tool Reference
+### `gotify_help` — Help and Discovery
 
-### Send a Notification
+Returns documentation, available actions, parameter reference, and examples.
 
 ```
-mcp__gotify-mcp__create_message
-  app_token   (required) Application token for this message
-  message     (required) Message body — markdown supported
-  title       (optional) Notification title
-  priority    (optional) 0–10 (0–3 low, 4–7 normal, 8–10 high/urgent)
-  extras      (optional) Additional data dict
+gotify_help()
+gotify_help(action="message")   # help for a specific action
 ```
 
-The `app_token` for `create_message` is passed **per call** — it is NOT read from the server env. Retrieve it first via a Bash subprocess, then pass to the tool:
+---
+
+## Action Reference
+
+### action="message"
+
+Manages push notification messages.
+
+| subaction | description | key params |
+|-----------|-------------|------------|
+| `send`    | Send a push notification | `app_token` (required), `message` (required), `title`, `priority` (0–10), `extras` |
+| `list`    | List recent messages | `limit` (1–200, default 100), `since` (pagination cursor) |
+| `delete`  | Delete a single message | `message_id` (required) |
+| `delete_all` | Delete all messages | — |
+
+**Examples:**
+
+```python
+# Send a notification
+gotify(action="message", subaction="send",
+       app_token="<token>",
+       title="Task Complete",
+       message="Project: gotify-mcp\nStatus: done",
+       priority=7)
+
+# Send with markdown
+gotify(action="message", subaction="send",
+       app_token="<token>",
+       title="Plan Complete",
+       message="## Summary\n- All steps implemented\n- Ready for review",
+       priority=7,
+       extras={"client::display": {"contentType": "text/markdown"}})
+
+# List messages
+gotify(action="message", subaction="list", limit=20)
+
+# Delete a message
+gotify(action="message", subaction="delete", message_id=42)
+
+# Delete all messages
+gotify(action="message", subaction="delete_all")
+```
+
+The `app_token` for `send` is passed **per call** — it is NOT read from the server env. Retrieve it first via a Bash subprocess:
 
 ```bash
 echo "$CLAUDE_PLUGIN_OPTION_GOTIFY_APP_TOKEN"
@@ -50,62 +95,84 @@ echo "$CLAUDE_PLUGIN_OPTION_GOTIFY_APP_TOKEN"
 
 If the variable is empty, report a configuration error — the `gotify_app_token` userConfig field has not been set.
 
-### Message Management
+---
 
-```
-mcp__gotify-mcp__get_messages
-  limit       (optional) Max messages to return (1–200, default 100)
-  since       (optional) Return messages with ID less than this (pagination)
+### action="application"
 
-mcp__gotify-mcp__delete_message
-  message_id  (required) Integer ID of message to delete
+Manages Gotify applications (sources for push notifications).
 
-mcp__gotify-mcp__delete_all_messages
-  (no parameters — deletes all messages across all applications)
-```
+| subaction | description | key params |
+|-----------|-------------|------------|
+| `list`    | List all applications | — |
+| `create`  | Create a new application | `name` (required), `description`, `default_priority` |
+| `update`  | Update an existing application | `app_id` (required), `name`, `description`, `default_priority` |
+| `delete`  | Delete an application | `app_id` (required) |
 
-### Application Management
+**Examples:**
 
-```
-mcp__gotify-mcp__get_applications
-  (no parameters)
+```python
+# List applications
+gotify(action="application", subaction="list")
 
-mcp__gotify-mcp__create_application
-  name              (required) Application name
-  description       (optional) Description
-  default_priority  (optional) Default message priority
+# Create an application
+gotify(action="application", subaction="create",
+       name="homelab-alerts",
+       description="Claude Code homelab notifications",
+       default_priority=5)
 
-mcp__gotify-mcp__update_application
-  app_id            (required) Integer application ID
-  name              (optional) New name
-  description       (optional) New description
-  default_priority  (optional) New default priority
+# Update an application
+gotify(action="application", subaction="update",
+       app_id=3, name="homelab-alerts-v2", default_priority=7)
 
-mcp__gotify-mcp__delete_application
-  app_id            (required) Integer application ID
+# Delete an application
+gotify(action="application", subaction="delete", app_id=3)
 ```
 
-### Client Management
+---
 
+### action="client"
+
+Manages Gotify clients (subscribers that receive notifications).
+
+| subaction | description | key params |
+|-----------|-------------|------------|
+| `list`    | List all clients | — |
+| `create`  | Create a new client | `name` (required) |
+
+**Examples:**
+
+```python
+# List clients
+gotify(action="client", subaction="list")
+
+# Create a client
+gotify(action="client", subaction="create", name="my-phone")
 ```
-mcp__gotify-mcp__get_clients
-  (no parameters)
 
-mcp__gotify-mcp__create_client
-  name  (required) Client name
+---
+
+### action="server"
+
+Retrieves server health and version information. No authentication required.
+
+| subaction | description | key params |
+|-----------|-------------|------------|
+| `health`  | Check server health | — |
+| `version` | Get server version | — |
+
+**Examples:**
+
+```python
+# Health check
+gotify(action="server", subaction="health")
+
+# Version info
+gotify(action="server", subaction="version")
 ```
 
-### Server Info
+---
 
-```
-mcp__gotify-mcp__get_health
-  (no parameters — no auth required)
-
-mcp__gotify-mcp__get_version
-  (no parameters — no auth required)
-```
-
-### Resources
+## Resources
 
 ```
 gotify://application/{app_id}/messages   — messages for a specific app
@@ -114,7 +181,7 @@ gotify://currentuser                     — current authenticated user info
 
 ---
 
-## HTTP Fallback Mode — curl Reference
+## HTTP Fallback Mode
 
 Use when MCP tools are unavailable. Credentials are in the subprocess environment as `CLAUDE_PLUGIN_OPTION_*` vars — use these directly in Bash subprocesses.
 
@@ -154,15 +221,14 @@ curl -s "$CLAUDE_PLUGIN_OPTION_GOTIFY_URL/application" \
 curl -s "$CLAUDE_PLUGIN_OPTION_GOTIFY_URL/health"
 ```
 
-### All other management operations (fallback)
-
-For delete, application CRUD, client management — use `GOTIFY_CLIENT_TOKEN` with the appropriate Gotify REST path:
+### Management operations (fallback)
 
 ```bash
-# Pattern: client token as X-Gotify-Key, method and path per operation
+# Delete a message
 curl -s -X DELETE "$CLAUDE_PLUGIN_OPTION_GOTIFY_URL/message/$MESSAGE_ID" \
   -H "X-Gotify-Key: $CLAUDE_PLUGIN_OPTION_GOTIFY_CLIENT_TOKEN"
 
+# Create application
 curl -s -X POST "$CLAUDE_PLUGIN_OPTION_GOTIFY_URL/application" \
   -H "X-Gotify-Key: $CLAUDE_PLUGIN_OPTION_GOTIFY_CLIENT_TOKEN" \
   -H "Content-Type: application/json" \
@@ -175,70 +241,42 @@ curl -s -X POST "$CLAUDE_PLUGIN_OPTION_GOTIFY_URL/application" \
 
 ### 1. Long Running Task Completes (>5 min)
 
-**MCP:**
-```
-mcp__gotify-mcp__create_message
-  app_token: <retrieve via: bash -c 'echo $CLAUDE_PLUGIN_OPTION_GOTIFY_APP_TOKEN'>
-  title: "Task Complete"
-  message: |
-    Project: <basename of cwd>
-    Task: <description>
-    Session: <session-id if known>
-    Status: Completed successfully
-  priority: 7
-```
-
-**HTTP fallback:**
-```bash
-curl -s -X POST "$CLAUDE_PLUGIN_OPTION_GOTIFY_URL/message" \
-  -H "X-Gotify-Key: $CLAUDE_PLUGIN_OPTION_GOTIFY_APP_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d "{\"title\":\"Task Complete\",\"message\":\"Project: $(basename $PWD)\nTask: $TASK_DESC\nStatus: Completed\",\"priority\":7}"
+```python
+gotify(action="message", subaction="send",
+       app_token="<retrieve via: bash -c 'echo $CLAUDE_PLUGIN_OPTION_GOTIFY_APP_TOKEN'>",
+       title="Task Complete",
+       message="Project: <basename of cwd>\nTask: <description>\nSession: <session-YYYY-MM-DD-HH-MM>\nStatus: Completed successfully",
+       priority=7)
 ```
 
 ### 2. Plan Implementation Finishes
 
-**MCP:**
-```
-mcp__gotify-mcp__create_message
-  app_token: <retrieve via: bash -c 'echo $CLAUDE_PLUGIN_OPTION_GOTIFY_APP_TOKEN'>
-  title: "Plan Complete"
-  message: |
-    Project: <basename of cwd>
-    Task: <plan description>
-    Status: All steps implemented
-    Next: Ready for review
-  priority: 7
+```python
+gotify(action="message", subaction="send",
+       app_token="<retrieve via: bash -c 'echo $CLAUDE_PLUGIN_OPTION_GOTIFY_APP_TOKEN'>",
+       title="Plan Complete",
+       message="Project: <basename of cwd>\nTask: <plan description>\nStatus: All steps implemented\nNext: Ready for review",
+       priority=7)
 ```
 
 ### 3. Blocked — Need User Input
 
-**MCP:**
-```
-mcp__gotify-mcp__create_message
-  app_token: <retrieve via: bash -c 'echo $CLAUDE_PLUGIN_OPTION_GOTIFY_APP_TOKEN'>
-  title: "Input Required"
-  message: |
-    Project: <basename of cwd>
-    Task: <current task>
-    Blocked: <reason>
-    Need: <what you need from user>
-  priority: 8
+```python
+gotify(action="message", subaction="send",
+       app_token="<retrieve via: bash -c 'echo $CLAUDE_PLUGIN_OPTION_GOTIFY_APP_TOKEN'>",
+       title="Input Required",
+       message="Project: <basename of cwd>\nTask: <current task>\nBlocked: <reason>\nNeed: <what you need from user>",
+       priority=8)
 ```
 
 ### 4. Task Transition — Need Review/Approval
 
-**MCP:**
-```
-mcp__gotify-mcp__create_message
-  app_token: <retrieve via: bash -c 'echo $CLAUDE_PLUGIN_OPTION_GOTIFY_APP_TOKEN'>
-  title: "Ready to Proceed"
-  message: |
-    Project: <basename of cwd>
-    Completed: <current phase>
-    Next: <next phase>
-    Action: Review required before proceeding
-  priority: 7
+```python
+gotify(action="message", subaction="send",
+       app_token="<retrieve via: bash -c 'echo $CLAUDE_PLUGIN_OPTION_GOTIFY_APP_TOKEN'>",
+       title="Ready to Proceed",
+       message="Project: <basename of cwd>\nCompleted: <current phase>\nNext: <next phase>\nAction: Review required before proceeding",
+       priority=7)
 ```
 
 ---
@@ -248,7 +286,7 @@ mcp__gotify-mcp__create_message
 All notifications MUST include:
 - **Project/Working Directory**: `basename` of current working directory
 - **Task Description**: Specific task completed or blocked on
-- **Session ID**: Construct as `session-YYYY-MM-DD-HH-MM` using the current UTC timestamp (e.g. `date -u +session-%Y-%m-%d-%H-%M` in Bash)
+- **Session ID**: Construct as `session-YYYY-MM-DD-HH-MM` using current UTC timestamp (`date -u +session-%Y-%m-%d-%H-%M`)
 - **Status/Next Action**: What's done and what needs user attention
 
 ---
@@ -265,8 +303,8 @@ All notifications MUST include:
 
 ## Notes
 
-- `create_message` always requires an explicit `app_token` — it is not read from server environment automatically
-- Management operations (`get_messages`, `get_applications`, etc.) use `GOTIFY_CLIENT_TOKEN` configured in the server env — no token parameter needed
-- `get_health` and `get_version` require no authentication
-- Markdown is supported in `message` field for both MCP and HTTP modes
-- Confirm notification sent: MCP tools return JSON with message ID on success
+- `gotify(action="message", subaction="send")` always requires an explicit `app_token` — it is not read from server environment automatically
+- Management operations (`list`, `delete`, application/client CRUD) use `GOTIFY_CLIENT_TOKEN` configured in the server env — no token parameter needed
+- `gotify(action="server", subaction="health")` and `gotify(action="server", subaction="version")` require no authentication
+- Markdown is supported in the `message` field for both MCP and HTTP modes
+- Confirm notification sent: `gotify(...)` returns JSON with message ID on success
