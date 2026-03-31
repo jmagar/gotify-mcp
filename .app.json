@@ -1,0 +1,9 @@
+{
+  "apps": [
+    {
+      "name": "gotify-mcp",
+      "type": "mcp",
+      "config": "./.mcp.json"
+    }
+  ]
+}

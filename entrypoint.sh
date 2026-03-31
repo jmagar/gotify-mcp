@@ -3,7 +3,7 @@ set -euo pipefail
 
 echo "Gotify MCP Service: Initializing..."
 
-# Required
+# Required service URL
 if [ -z "${GOTIFY_URL:-}" ]; then
     echo "Error: GOTIFY_URL environment variable is required" >&2
     exit 1
@@ -26,14 +26,14 @@ if [ -z "${GOTIFY_CLIENT_TOKEN:-}" ]; then
 fi
 
 export GOTIFY_MCP_HOST=${GOTIFY_MCP_HOST:-"0.0.0.0"}
-export GOTIFY_MCP_PORT=${GOTIFY_MCP_PORT:-"8084"}
+export GOTIFY_MCP_PORT=${GOTIFY_MCP_PORT:-"9158"}
 export GOTIFY_MCP_TRANSPORT
 export GOTIFY_LOG_LEVEL=${GOTIFY_LOG_LEVEL:-"INFO"}
 
 echo "Gotify MCP Service: Configuration validated"
 echo "  - GOTIFY_URL: $GOTIFY_URL"
-echo "  - GOTIFY_CLIENT_TOKEN: $([ -n "${GOTIFY_CLIENT_TOKEN:-}" ] && echo "***SET***" || echo "NOT SET")"
-echo "  - GOTIFY_MCP_TOKEN: $([ -n "${GOTIFY_MCP_TOKEN:-}" ] && echo "***SET***" || echo "NOT SET")"
+echo "  - GOTIFY_CLIENT_TOKEN: $([ -n "${GOTIFY_CLIENT_TOKEN:-}" ] && echo "SET" || echo "NOT SET")"
+echo "  - GOTIFY_MCP_TOKEN: $([ -n "${GOTIFY_MCP_TOKEN:-}" ] && echo "SET" || echo "NOT SET")"
 echo "  - MCP_HOST: $GOTIFY_MCP_HOST"
 echo "  - MCP_PORT: $GOTIFY_MCP_PORT"
 echo "  - MCP_TRANSPORT: $GOTIFY_MCP_TRANSPORT"

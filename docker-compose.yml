@@ -4,25 +4,35 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: gotify-mcp
+    user: "${PUID:-1000}:${PGID:-1000}"
     ports:
-      - ${GOTIFY_MCP_PORT:-8084}:${GOTIFY_MCP_PORT:-8084}
+      - "${GOTIFY_MCP_PORT:-9158}:${GOTIFY_MCP_PORT:-9158}"
     env_file:
       - .env
     volumes:
-      - ${APPDATA_PATH}/gotify-mcp/logs:/app/logs
+      - gotify-mcp-logs:/app/logs
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
     healthcheck:
       test:
         - CMD
-        - curl
-        - -f
-        - http://localhost:${GOTIFY_MCP_PORT:-8084}/health
+        - wget
+        - -qO-
+        - http://localhost:${GOTIFY_MCP_PORT:-9158}/health
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 30s
     networks:
       - jakenet
+
+volumes:
+  gotify-mcp-logs:
+
 networks:
   jakenet:
     external: true

@@ -1,0 +1,39 @@
+# VCS
+.git
+.github
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# AI tooling
+.claude
+.claude-plugin
+.codex-plugin
+.omc
+.lavra
+.beads
+.serena
+.worktrees
+.full-review
+.full-review-archive-*
+
+# IDE
+.vscode
+.cursor
+.windsurf
+.1code
+
+# Not needed at runtime
+docs
+tests
+scripts
+*.md
+!README.md
+
+# Runtime artifacts
+logs
+backups
+*.log
+.cache

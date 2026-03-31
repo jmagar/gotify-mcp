@@ -1,5 +1,5 @@
 {
-  "description": "Sync userConfig credentials to .env and enforce 600 permissions",
+  "description": "Sync userConfig credentials to .env, enforce 600 permissions, ensure gitignore",
   "hooks": {
     "SessionStart": [
       {
@@ -11,7 +11,7 @@
           },
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/ensure-gitignore.sh",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/ensure-ignore-files.sh",
             "timeout": 5
           }
         ]
@@ -24,11 +24,6 @@
           {
             "type": "command",
             "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/fix-env-perms.sh",
-            "timeout": 5
-          },
-          {
-            "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/ensure-gitignore.sh",
             "timeout": 5
           }
         ]

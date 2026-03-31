@@ -12,8 +12,14 @@
     "gotify_mcp_url": {
       "type": "string",
       "title": "Gotify MCP Server URL",
-      "description": "URL of the gotify-mcp MCP server. Default http://localhost:9158 works if running via docker compose in this repo. Change if running on a different host or port.",
-      "default": "http://localhost:9158",
+      "description": "Full MCP endpoint URL (e.g. http://localhost:9158/mcp). Default works if running via docker compose in this repo.",
+      "default": "http://localhost:9158/mcp",
+      "sensitive": false
+    },
+    "gotify_mcp_token": {
+      "type": "string",
+      "title": "MCP Server Bearer Token",
+      "description": "Bearer token for authenticating with the gotify-mcp server. Must match GOTIFY_MCP_TOKEN in .env. Generate with: openssl rand -hex 32",
       "sensitive": false
     },
     "gotify_url": {
@@ -25,13 +31,13 @@
     "gotify_app_token": {
       "type": "string",
       "title": "Gotify App Token",
-      "description": "Gotify application token for sending messages. Found in Gotify UI under Settings → Apps → Create Application.",
+      "description": "Gotify application token for sending messages. Found in Gotify UI under Settings -> Apps -> Create Application.",
       "sensitive": true
     },
     "gotify_client_token": {
       "type": "string",
       "title": "Gotify Client Token",
-      "description": "Gotify client token for management operations (list messages, manage apps/clients). Found in Gotify UI under Settings → Clients.",
+      "description": "Gotify client token for management operations (list messages, manage apps/clients). Found in Gotify UI under Settings -> Clients.",
       "sensitive": true
     }
   }

@@ -1,0 +1,19 @@
+{
+  "name": "gotify-mcp",
+  "version": "1.0.0",
+  "description": "Gotify push notification management via MCP",
+  "interface": {
+    "type": "mcp",
+    "transport": "http",
+    "url": "http://localhost:9158/mcp",
+    "displayName": "Gotify MCP",
+    "shortDescription": "Send and manage Gotify push notifications via MCP tools",
+    "longDescription": "gotify-mcp provides MCP tools for sending push notifications and managing Gotify applications, clients, and messages. Supports dual transport (HTTP and stdio) with bearer auth.",
+    "category": "infrastructure",
+    "capabilities": ["notifications", "messaging", "push", "homelab"],
+    "brandColor": "#7B44F2",
+    "composerIcon": "assets/icon.png",
+    "logo": "assets/logo.svg",
+    "screenshots": []
+  }
+}

@@ -9,19 +9,48 @@ wheels/
 # Virtual environments
 .venv
 .venv-backend
+
+# Secrets — never commit
 .env
 .env.*
 !.env.example
-*.log
-logs/*
-!logs/.gitkeep
+
+# Runtime artifacts
 backups/*
 !backups/.gitkeep
+logs/*
+!logs/.gitkeep
+*.log
 
+# AI tooling
+.claude/settings.local.json
+.claude/worktrees/
+.omc/
+.lavra/
+.beads/
+.serena/
+.worktrees
+.full-review/
+.full-review-archive-*
+
+# IDE
+.vscode/
+.cursor/
+.windsurf/
+.1code/
+
+# Caches
+.cache/
+
+# Docs (generated/session artifacts)
+docs/plans/
+docs/sessions/
+docs/reports/
+docs/research/
+docs/superpowers/
+
+# Misc legacy patterns
 .bivvy
-.cursor
-
-
 web-ui/frontend/node_modules
 web-ui/backend/.venv-backend/
 .pnpm-store/
