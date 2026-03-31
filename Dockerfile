@@ -20,13 +20,13 @@ RUN chmod +x entrypoint.sh && \
 
 USER mcpuser
 
-EXPOSE 9158
+EXPOSE 8084
 
 ENV GOTIFY_MCP_HOST=0.0.0.0
-ENV GOTIFY_MCP_PORT=9158
+ENV GOTIFY_MCP_PORT=8084
 ENV GOTIFY_MCP_TRANSPORT=http
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
-    CMD curl -f http://localhost:${GOTIFY_MCP_PORT:-9158}/health || exit 1
+    CMD curl -f http://localhost:${GOTIFY_MCP_PORT:-8084}/health || exit 1
 
 CMD ["./entrypoint.sh"]
