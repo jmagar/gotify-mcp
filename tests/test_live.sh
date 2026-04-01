@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 TOKEN="${GOTIFY_MCP_TOKEN:?GOTIFY_MCP_TOKEN must be set}"
-BASE_URL="${GOTIFY_MCP_URL:-http://localhost:8084}"
+BASE_URL="${GOTIFY_MCP_URL:-http://localhost:9158}"
 
 echo "Testing unauthenticated rejection..."
 status=$(curl -s -o /dev/null -w "%{http_code}" "$BASE_URL/mcp")

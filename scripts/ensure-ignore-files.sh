@@ -42,6 +42,41 @@ ensure_pattern() {
   fi
 }
 
+# Ensure a pair of patterns appear in order: `base` must come before `negation`.
+# If `base` is missing, appending it after an existing `negation` would reverse
+# the required order and cause the negation to be ignored. This function removes
+# both lines and re-appends them in the correct order when either is missing.
+ensure_ordered_pair() {
+  local file="$1"
+  local base="$2"
+  local negation="$3"
+  local label="$4"
+
+  local has_base has_neg
+  has_base=$(grep -cxF "$base" "$file" 2>/dev/null || true)
+  has_neg=$(grep -cxF "$negation" "$file" 2>/dev/null || true)
+
+  if [[ "$has_base" -gt 0 && "$has_neg" -gt 0 ]]; then
+    pass "$label: '$base' and '$negation' present"
+    return
+  fi
+
+  if $CHECK_MODE; then
+    [[ "$has_base" -eq 0 ]] && fail "$label: '$base'" "missing"
+    [[ "$has_neg" -eq 0 ]] && fail "$label: '$negation'" "missing"
+    return
+  fi
+
+  # Remove both lines (stale order), then re-append in correct order
+  local tmp
+  tmp=$(mktemp)
+  grep -vxF "$base" "$file" | grep -vxF "$negation" > "$tmp" || true
+  mv "$tmp" "$file"
+  echo "$base" >> "$file"
+  echo "$negation" >> "$file"
+  pass "$label: '$base' and '$negation' (ordered)"
+}
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # .gitignore — full required pattern list from plugin-setup-guide
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -55,18 +90,15 @@ else
   touch "$GITIGNORE"
 
   # ── Secrets ──
-  REQUIRED_GIT=(
-    ".env"
-    ".env.*"
-    "!.env.example"
-  )
+  # .env and .env.* must come before !.env.example — use ordered pair helper
+  ensure_pattern "$GITIGNORE" ".env" ".gitignore"
+  ensure_ordered_pair "$GITIGNORE" ".env.*" "!.env.example" ".gitignore"
+  REQUIRED_GIT=()
 
   # ── Runtime / hook artifacts ──
+  ensure_ordered_pair "$GITIGNORE" "backups/*" "!backups/.gitkeep" ".gitignore"
+  ensure_ordered_pair "$GITIGNORE" "logs/*" "!logs/.gitkeep" ".gitignore"
   REQUIRED_GIT+=(
-    "backups/*"
-    "!backups/.gitkeep"
-    "logs/*"
-    "!logs/.gitkeep"
     "*.log"
   )
 

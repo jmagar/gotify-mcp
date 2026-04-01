@@ -20,7 +20,7 @@
       "type": "string",
       "title": "MCP Server Bearer Token",
       "description": "Bearer token for authenticating with the gotify-mcp server. Must match GOTIFY_MCP_TOKEN in .env. Generate with: openssl rand -hex 32",
-      "sensitive": false
+      "sensitive": true
     },
     "gotify_url": {
       "type": "string",

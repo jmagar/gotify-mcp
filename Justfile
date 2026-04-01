@@ -29,7 +29,7 @@ logs:
     docker compose logs -f
 
 health:
-    curl -sf http://localhost:8084/health | jq .
+    curl -sf http://localhost:9158/health | jq .
 
 test-live:
     bash tests/test_live.sh

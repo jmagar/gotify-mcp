@@ -153,7 +153,7 @@ gotify(action="client", subaction="create", name="my-phone")
 
 ### action="server"
 
-Retrieves server health and version information. No authentication required.
+Retrieves server health and version information. Note: MCP tool calls still require bearer authentication. Only the raw `/health` HTTP endpoint is unauthenticated.
 
 | subaction | description | key params |
 |-----------|-------------|------------|

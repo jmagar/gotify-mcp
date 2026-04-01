@@ -362,8 +362,15 @@ echo
 # ── 13. docker-compose.yaml checks ───────────────────────────────────────────
 echo "── 13. docker-compose.yaml ──"
 
-COMPOSE="$PROJECT_DIR/docker-compose.yaml"
-if [[ -f "$COMPOSE" ]]; then
+# Detect both .yml and .yaml variants
+COMPOSE=""
+if [[ -f "$PROJECT_DIR/docker-compose.yml" ]]; then
+  COMPOSE="$PROJECT_DIR/docker-compose.yml"
+elif [[ -f "$PROJECT_DIR/docker-compose.yaml" ]]; then
+  COMPOSE="$PROJECT_DIR/docker-compose.yaml"
+fi
+
+if [[ -n "$COMPOSE" ]]; then
   # env_file: .env present
   if grep -qE '^\s+env_file:' "$COMPOSE"; then
     pass "docker-compose.yaml has env_file directive"
@@ -385,7 +392,7 @@ if [[ -f "$COMPOSE" ]]; then
     pass "docker-compose.yaml has no environment: block"
   fi
 else
-  warn "docker-compose.yaml" "File not found — skipping compose checks"
+  warn "docker-compose.yml" "File not found (checked .yml and .yaml) — skipping compose checks"
 fi
 echo
 

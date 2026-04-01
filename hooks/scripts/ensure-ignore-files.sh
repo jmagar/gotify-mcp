@@ -85,7 +85,10 @@ check_or_fix() {
   shift
   local patterns=("$@")
 
-  touch "$file"
+  # In check mode, do not create or modify files — report missing patterns only
+  if [ "$CHECK_MODE" != true ]; then
+    touch "$file"
+  fi
 
   for pattern in "${patterns[@]}"; do
     if ! grep -qxF "$pattern" "$file" 2>/dev/null; then

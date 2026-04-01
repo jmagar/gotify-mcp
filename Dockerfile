@@ -45,6 +45,8 @@ ENV GOTIFY_MCP_PORT=9158
 ENV GOTIFY_MCP_TRANSPORT=http
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
-    CMD wget -qO- http://localhost:${GOTIFY_MCP_PORT:-9158}/health || exit 1
+    CMD python -c "import os, sys, urllib.request; port = os.environ.get('GOTIFY_MCP_PORT', '9158'); \
+url = f'http://localhost:{port}/health'; \
+resp = urllib.request.urlopen(url, timeout=5); sys.exit(0 if resp.status == 200 else 1)"
 
 CMD ["./entrypoint.sh"]

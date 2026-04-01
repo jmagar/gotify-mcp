@@ -55,7 +55,7 @@ if grep -qE '^USER\s' "$DOCKERFILE"; then
   USER_VALUE=$(echo "$USER_LINE" | sed 's/^USER\s*//')
 
   # Check for 1000:1000 or variable-based UID:GID
-  if echo "$USER_VALUE" | grep -qE '^\$?\{?PUID|1000:1000|1000$'; then
+  if echo "$USER_VALUE" | grep -qE '^(1000:1000|\$\{PUID\}:\$\{PGID\})$'; then
     pass "Non-root user ($USER_VALUE)"
   else
     warn "Non-root user" "USER is '$USER_VALUE' — expected 1000:1000 or \${PUID}:\${PGID}"

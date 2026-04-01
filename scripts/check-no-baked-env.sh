@@ -21,8 +21,14 @@ warn() { echo "  ⚠ WARN: $1 — $2"; WARN=$((WARN + 1)); }
 echo "=== No Baked Env Vars Check: $PROJECT_DIR ==="
 
 # ── 1. docker-compose.yaml — no environment: block ───────────────────────────
-COMPOSE_FILE="$PROJECT_DIR/docker-compose.yaml"
-if [[ -f "$COMPOSE_FILE" ]]; then
+# Detect both .yml and .yaml variants
+COMPOSE_FILE=""
+if [[ -f "$PROJECT_DIR/docker-compose.yml" ]]; then
+  COMPOSE_FILE="$PROJECT_DIR/docker-compose.yml"
+elif [[ -f "$PROJECT_DIR/docker-compose.yaml" ]]; then
+  COMPOSE_FILE="$PROJECT_DIR/docker-compose.yaml"
+fi
+if [[ -n "$COMPOSE_FILE" ]]; then
   # Check for environment: key under services
   if grep -qE '^\s+environment:' "$COMPOSE_FILE"; then
     fail "No environment: block in docker-compose.yaml" \
@@ -60,7 +66,7 @@ if [[ -f "$COMPOSE_FILE" ]]; then
     fi
   fi
 else
-  warn "docker-compose.yaml" "File not found at $COMPOSE_FILE — skipping compose checks"
+  warn "docker-compose.yml" "File not found (checked .yml and .yaml) — skipping compose checks"
 fi
 
 # ── 2. Dockerfile — no sensitive ENV values ───────────────────────────────────
