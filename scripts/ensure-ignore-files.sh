@@ -67,7 +67,7 @@ ensure_ordered_pair() {
     fi
     # Wrong order — fall through to reorder unless in check mode
     if $CHECK_MODE; then
-      fail "$label" "negation '$negation' appears before '$base' — wrong order, .env.example will be ignored"
+      fail "$label" "negation '$negation' appears before '$base' — wrong order, negation will be ignored"
       return
     fi
   fi

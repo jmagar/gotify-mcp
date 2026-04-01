@@ -243,7 +243,7 @@ curl -s -X POST "$CLAUDE_PLUGIN_OPTION_GOTIFY_URL/application" \
 ### 1. Long Running Task Completes (>5 min)
 
 ```python
-gotify(action="message", subaction="send",
+gotify(action="send_message",
        app_token="<retrieve via: bash -c 'echo $CLAUDE_PLUGIN_OPTION_GOTIFY_APP_TOKEN'>",
        title="Task Complete",
        message="Project: <basename of cwd>\nTask: <description>\nSession: <session-YYYY-MM-DD-HH-MM>\nStatus: Completed successfully",
@@ -253,7 +253,7 @@ gotify(action="message", subaction="send",
 ### 2. Plan Implementation Finishes
 
 ```python
-gotify(action="message", subaction="send",
+gotify(action="send_message",
        app_token="<retrieve via: bash -c 'echo $CLAUDE_PLUGIN_OPTION_GOTIFY_APP_TOKEN'>",
        title="Plan Complete",
        message="Project: <basename of cwd>\nTask: <plan description>\nStatus: All steps implemented\nNext: Ready for review",
@@ -263,7 +263,7 @@ gotify(action="message", subaction="send",
 ### 3. Blocked — Need User Input
 
 ```python
-gotify(action="message", subaction="send",
+gotify(action="send_message",
        app_token="<retrieve via: bash -c 'echo $CLAUDE_PLUGIN_OPTION_GOTIFY_APP_TOKEN'>",
        title="Input Required",
        message="Project: <basename of cwd>\nTask: <current task>\nBlocked: <reason>\nNeed: <what you need from user>",
@@ -273,7 +273,7 @@ gotify(action="message", subaction="send",
 ### 4. Task Transition — Need Review/Approval
 
 ```python
-gotify(action="message", subaction="send",
+gotify(action="send_message",
        app_token="<retrieve via: bash -c 'echo $CLAUDE_PLUGIN_OPTION_GOTIFY_APP_TOKEN'>",
        title="Ready to Proceed",
        message="Project: <basename of cwd>\nCompleted: <current phase>\nNext: <next phase>\nAction: Review required before proceeding",
@@ -304,7 +304,7 @@ All notifications MUST include:
 
 ## Notes
 
-- `gotify(action="message", subaction="send")` always requires an explicit `app_token` — it is not read from server environment automatically
+- `gotify(action="send_message")` always requires an explicit `app_token` — it is not read from server environment automatically
 - Management operations (`list`, `delete`, application/client CRUD) use `GOTIFY_CLIENT_TOKEN` configured in the server env — no token parameter needed
 - `gotify(action="health")` and `gotify(action="version")` require bearer authentication (like all MCP tool calls). The raw HTTP `/health` endpoint is unauthenticated.
 - Markdown is supported in the `message` field for both MCP and HTTP modes

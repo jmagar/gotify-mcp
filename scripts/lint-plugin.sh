@@ -171,6 +171,7 @@ GENERIC_PATTERNS='^\s*(MCP_BEARER_TOKEN|API_KEY|PORT|HOST|TOKEN|SECRET|PASSWORD|
 GENERIC_FOUND=false
 for check_file in \
   "$PROJECT_DIR/.env.example" \
+  "$PROJECT_DIR/docker-compose.yml" \
   "$PROJECT_DIR/docker-compose.yaml"; do
   if [[ -f "$check_file" ]]; then
     MATCHES=$(grep -nE "$GENERIC_PATTERNS" "$check_file" 2>/dev/null || true)
@@ -275,7 +276,6 @@ for req_file in \
   Justfile \
   entrypoint.sh \
   Dockerfile \
-  docker-compose.yaml \
   .dockerignore \
   .pre-commit-config.yaml; do
   if [[ -e "$PROJECT_DIR/$req_file" ]]; then
@@ -284,6 +284,13 @@ for req_file in \
     fail "$req_file" "Required file not found"
   fi
 done
+
+# docker-compose — accept both .yml and .yaml
+if [[ -f "$PROJECT_DIR/docker-compose.yml" || -f "$PROJECT_DIR/docker-compose.yaml" ]]; then
+  pass "docker-compose.yml/.yaml exists"
+else
+  fail "docker-compose.yml" "Required file not found (checked docker-compose.yml and docker-compose.yaml)"
+fi
 echo
 
 # ── 9. Symlinks — AGENTS.md and GEMINI.md → CLAUDE.md ────────────────────────
