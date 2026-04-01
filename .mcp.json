@@ -2,10 +2,7 @@
   "mcpServers": {
     "gotify-mcp": {
       "type": "http",
-      "url": "${user_config.gotify_mcp_url}",
-      "headers": {
-        "Authorization": "Bearer ${user_config.gotify_mcp_token}"
-      }
+      "url": "${env.GOTIFY_MCP_URL}"
     }
   }
 }

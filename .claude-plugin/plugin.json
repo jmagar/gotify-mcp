@@ -7,13 +7,19 @@
   },
   "repository": "https://github.com/jmagar/gotify-mcp",
   "license": "MIT",
-  "keywords": ["gotify", "notifications", "push", "homelab", "mcp"],
+  "keywords": [
+    "gotify",
+    "notifications",
+    "push",
+    "homelab",
+    "mcp"
+  ],
   "userConfig": {
     "gotify_mcp_url": {
       "type": "string",
       "title": "Gotify MCP Server URL",
       "description": "Full MCP endpoint URL (e.g. http://localhost:9158/mcp). Default works if running via docker compose in this repo.",
-      "default": "http://localhost:9158/mcp",
+      "default": "https://gotify.tootie.tv/mcp",
       "sensitive": false
     },
     "gotify_mcp_token": {
