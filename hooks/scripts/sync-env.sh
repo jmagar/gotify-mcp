@@ -40,11 +40,16 @@ done
 # Fail if bearer token is not set — do NOT auto-generate.
 # Auto-generated tokens cause a mismatch: the server reads the generated token
 # but Claude Code sends the (empty) userConfig value. Every MCP call returns 401.
-if ! grep -q "^GOTIFY_MCP_TOKEN=.\+" "$ENV_FILE" 2>/dev/null; then
-  echo "sync-env: ERROR — GOTIFY_MCP_TOKEN is not set." >&2
-  echo "  Generate one:  openssl rand -hex 32" >&2
-  echo "  Then paste it into the plugin's userConfig MCP token field." >&2
-  exit 1
+# Skip this check when auth is explicitly disabled via GOTIFY_MCP_NO_AUTH=true.
+_no_auth=$(grep -E "^GOTIFY_MCP_NO_AUTH=" "$ENV_FILE" 2>/dev/null | cut -d= -f2 || true)
+if [[ "$_no_auth" != "true" && "$_no_auth" != "1" ]]; then
+  if ! grep -Eq "^GOTIFY_MCP_TOKEN=.+" "$ENV_FILE" 2>/dev/null; then
+    echo "sync-env: ERROR — GOTIFY_MCP_TOKEN is not set." >&2
+    echo "  Generate one:  openssl rand -hex 32" >&2
+    echo "  Then paste it into the plugin's userConfig MCP token field." >&2
+    echo "  Or set GOTIFY_MCP_NO_AUTH=true to disable auth (not recommended)." >&2
+    exit 1
+  fi
 fi
 
 chmod 600 "$ENV_FILE"

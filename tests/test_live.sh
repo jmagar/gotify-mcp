@@ -11,7 +11,11 @@ echo "Testing bad token rejection..."
 status=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer bad-token" "$BASE_URL/mcp")
 [ "$status" = "401" ] || { echo "FAIL: expected 401 for bad token, got $status"; exit 1; }
 
-echo "Testing health..."
+echo "Testing valid token is accepted..."
+status=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $TOKEN" "$BASE_URL/mcp")
+[ "$status" != "401" ] || { echo "FAIL: valid token was rejected with 401"; exit 1; }
+
+echo "Testing health (unauthenticated)..."
 timeout 30 curl -sf "$BASE_URL/health" | jq .
 
 echo "All live tests passed."

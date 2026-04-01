@@ -1,5 +1,5 @@
 dev:
-    uv run python -m gotify_mcp
+    uv run python -m gotify_mcp.server
 
 lint:
     uv run ruff check .

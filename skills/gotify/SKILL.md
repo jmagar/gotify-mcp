@@ -23,10 +23,10 @@ This skill exposes two MCP tools: `gotify` (action router) and `gotify_help`.
 
 ### `gotify` — Action Router
 
-Manages Gotify push notifications, messages, applications, clients, and server info through a unified action+subaction interface.
+Manages Gotify push notifications, messages, applications, clients, and server info through flat action names.
 
 ```
-gotify(action, subaction, **params)
+gotify(action, **params)
 ```
 
 **Always prefer MCP mode** (`gotify(...)` tool calls). Fall back to HTTP only when MCP tools are unavailable.
@@ -41,36 +41,35 @@ Returns documentation, available actions, parameter reference, and examples.
 
 ```
 gotify_help()
-gotify_help(action="message")   # help for a specific action
 ```
 
 ---
 
 ## Action Reference
 
-### action="message"
+The `gotify` tool uses **flat action names** — there is no `subaction` parameter. Pass `action=` with one of the values below.
 
-Manages push notification messages.
+### Messages
 
-| subaction | description | key params |
-|-----------|-------------|------------|
-| `send`    | Send a push notification | `app_token` (required), `message` (required), `title`, `priority` (0–10), `extras` |
-| `list`    | List recent messages | `limit` (1–200, default 100), `since` (pagination cursor) |
-| `delete`  | Delete a single message | `message_id` (required) |
-| `delete_all` | Delete all messages | — |
+| action | description | key params | destructive |
+|--------|-------------|------------|-------------|
+| `send_message` | Send a push notification | `app_token` (required), `message` (required), `title`, `priority` (0–10), `extras` | no |
+| `list_messages` | List recent messages | `limit`, `offset`, `app_id`, `query`, `sort_by`, `sort_order` | no |
+| `delete_message` | Delete a single message | `message_id` (required), `confirm=True` | yes |
+| `delete_all_messages` | Delete all messages | `confirm=True` | yes |
 
 **Examples:**
 
 ```python
 # Send a notification
-gotify(action="message", subaction="send",
+gotify(action="send_message",
        app_token="<token>",
        title="Task Complete",
        message="Project: gotify-mcp\nStatus: done",
        priority=7)
 
 # Send with markdown
-gotify(action="message", subaction="send",
+gotify(action="send_message",
        app_token="<token>",
        title="Plan Complete",
        message="## Summary\n- All steps implemented\n- Ready for review",
@@ -78,16 +77,16 @@ gotify(action="message", subaction="send",
        extras={"client::display": {"contentType": "text/markdown"}})
 
 # List messages
-gotify(action="message", subaction="list", limit=20)
+gotify(action="list_messages", limit=20)
 
-# Delete a message
-gotify(action="message", subaction="delete", message_id=42)
+# Delete a message (confirm=True required)
+gotify(action="delete_message", message_id=42, confirm=True)
 
-# Delete all messages
-gotify(action="message", subaction="delete_all")
+# Delete all messages (confirm=True required)
+gotify(action="delete_all_messages", confirm=True)
 ```
 
-The `app_token` for `send` is passed **per call** — it is NOT read from the server env. Retrieve it first via a Bash subprocess:
+The `app_token` for `send_message` is passed **per call** — it is NOT read from the server env. Retrieve it first via a Bash subprocess:
 
 ```bash
 echo "$CLAUDE_PLUGIN_OPTION_GOTIFY_APP_TOKEN"
@@ -97,77 +96,79 @@ If the variable is empty, report a configuration error — the `gotify_app_token
 
 ---
 
-### action="application"
+### Applications
 
-Manages Gotify applications (sources for push notifications).
-
-| subaction | description | key params |
-|-----------|-------------|------------|
-| `list`    | List all applications | — |
-| `create`  | Create a new application | `name` (required), `description`, `default_priority` |
-| `update`  | Update an existing application | `app_id` (required), `name`, `description`, `default_priority` |
-| `delete`  | Delete an application | `app_id` (required) |
+| action | description | key params | destructive |
+|--------|-------------|------------|-------------|
+| `list_applications` | List all applications | `offset`, `limit`, `query` | no |
+| `create_application` | Create a new application | `name` (required), `description`, `default_priority` | no |
+| `update_application` | Update an existing application | `app_id` (required), `name`, `description`, `default_priority` | no |
+| `delete_application` | Delete an application | `app_id` (required), `confirm=True` | yes |
 
 **Examples:**
 
 ```python
 # List applications
-gotify(action="application", subaction="list")
+gotify(action="list_applications")
 
 # Create an application
-gotify(action="application", subaction="create",
+gotify(action="create_application",
        name="homelab-alerts",
        description="Claude Code homelab notifications",
        default_priority=5)
 
 # Update an application
-gotify(action="application", subaction="update",
+gotify(action="update_application",
        app_id=3, name="homelab-alerts-v2", default_priority=7)
 
-# Delete an application
-gotify(action="application", subaction="delete", app_id=3)
+# Delete an application (confirm=True required)
+gotify(action="delete_application", app_id=3, confirm=True)
 ```
 
 ---
 
-### action="client"
+### Clients
 
 Manages Gotify clients (subscribers that receive notifications).
 
-| subaction | description | key params |
-|-----------|-------------|------------|
-| `list`    | List all clients | — |
-| `create`  | Create a new client | `name` (required) |
+| action | description | key params | destructive |
+|--------|-------------|------------|-------------|
+| `list_clients` | List all clients | — | no |
+| `create_client` | Create a new client | `name` (required) | no |
+| `delete_client` | Delete a client | `client_id` (required), `confirm=True` | yes |
 
 **Examples:**
 
 ```python
 # List clients
-gotify(action="client", subaction="list")
+gotify(action="list_clients")
 
 # Create a client
-gotify(action="client", subaction="create", name="my-phone")
+gotify(action="create_client", name="my-phone")
+
+# Delete a client (confirm=True required)
+gotify(action="delete_client", client_id=5, confirm=True)
 ```
 
 ---
 
-### action="server"
+### Server Info
 
 Retrieves server health and version information. Note: MCP tool calls still require bearer authentication. Only the raw `/health` HTTP endpoint is unauthenticated.
 
-| subaction | description | key params |
-|-----------|-------------|------------|
-| `health`  | Check server health | — |
+| action | description | key params |
+|--------|-------------|------------|
+| `health` | Check server health | — |
 | `version` | Get server version | — |
 
 **Examples:**
 
 ```python
 # Health check
-gotify(action="server", subaction="health")
+gotify(action="health")
 
 # Version info
-gotify(action="server", subaction="version")
+gotify(action="version")
 ```
 
 ---
