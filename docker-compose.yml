@@ -8,7 +8,7 @@ services:
     ports:
       - "${GOTIFY_MCP_PORT:-9158}:${GOTIFY_MCP_PORT:-9158}"
     env_file:
-      - .env
+      - ~/.claude-homelab/.env
     volumes:
       - gotify-mcp-logs:/app/logs
     restart: unless-stopped
