@@ -444,8 +444,9 @@ def main() -> None:
     if GOTIFY_MCP_TRANSPORT == "stdio":
         mcp.run(transport="stdio")
     else:
-        # Add BearerAuth middleware for HTTP transport
-        mcp.app.add_middleware(BearerAuthMiddleware)
+        # BearerAuth skipped when GOTIFY_MCP_NO_AUTH=true (OAuth handled at gateway)
+        if not GOTIFY_MCP_NO_AUTH:
+            mcp.app.add_middleware(BearerAuthMiddleware)
         mcp.run(
             transport="streamable-http",
             host=GOTIFY_MCP_HOST,

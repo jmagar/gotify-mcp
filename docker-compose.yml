@@ -35,4 +35,5 @@ volumes:
 
 networks:
   jakenet:
+    name: ${DOCKER_NETWORK:-gotify-mcp}
     external: true
