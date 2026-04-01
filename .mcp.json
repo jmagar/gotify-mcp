@@ -2,7 +2,7 @@
   "mcpServers": {
     "gotify-mcp": {
       "type": "http",
-      "url": "${env.GOTIFY_MCP_URL}"
+      "url": "${user_config.gotify_mcp_url}"
     }
   }
 }
