@@ -57,8 +57,19 @@ ensure_ordered_pair() {
   has_neg=$(grep -cxF "$negation" "$file" 2>/dev/null || true)
 
   if [[ "$has_base" -gt 0 && "$has_neg" -gt 0 ]]; then
-    pass "$label: '$base' and '$negation' present"
-    return
+    # Both present — verify base appears before negation
+    local base_line neg_line
+    base_line=$(grep -nxF "$base" "$file" | head -1 | cut -d: -f1)
+    neg_line=$(grep -nxF "$negation" "$file" | head -1 | cut -d: -f1)
+    if [[ "$base_line" -lt "$neg_line" ]]; then
+      pass "$label: '$base' and '$negation' in correct order"
+      return
+    fi
+    # Wrong order — fall through to reorder unless in check mode
+    if $CHECK_MODE; then
+      fail "$label" "negation '$negation' appears before '$base' — wrong order, .env.example will be ignored"
+      return
+    fi
   fi
 
   if $CHECK_MODE; then
@@ -67,7 +78,7 @@ ensure_ordered_pair() {
     return
   fi
 
-  # Remove both lines (stale order), then re-append in correct order
+  # Remove both lines (stale or wrong order), then re-append in correct order
   local tmp
   tmp=$(mktemp)
   grep -vxF "$base" "$file" | grep -vxF "$negation" > "$tmp" || true

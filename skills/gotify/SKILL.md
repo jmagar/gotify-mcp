@@ -306,6 +306,6 @@ All notifications MUST include:
 
 - `gotify(action="message", subaction="send")` always requires an explicit `app_token` — it is not read from server environment automatically
 - Management operations (`list`, `delete`, application/client CRUD) use `GOTIFY_CLIENT_TOKEN` configured in the server env — no token parameter needed
-- `gotify(action="server", subaction="health")` and `gotify(action="server", subaction="version")` require no authentication
+- `gotify(action="health")` and `gotify(action="version")` require bearer authentication (like all MCP tool calls). The raw HTTP `/health` endpoint is unauthenticated.
 - Markdown is supported in the `message` field for both MCP and HTTP modes
 - Confirm notification sent: `gotify(...)` returns JSON with message ID on success
