@@ -1,19 +1,43 @@
 {
   "name": "gotify-mcp",
   "version": "1.0.0",
-  "description": "Gotify push notification management via MCP",
+  "description": "Gotify push notification management via MCP.",
+  "homepage": "https://github.com/jmagar/gotify-mcp",
+  "repository": "https://github.com/jmagar/gotify-mcp",
+  "license": "MIT",
+  "keywords": [
+    "gotify",
+    "notifications",
+    "push",
+    "homelab",
+    "mcp"
+  ],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "apps": "./.app.json",
   "interface": {
-    "type": "mcp",
-    "transport": "http",
-    "url": "http://localhost:9158/mcp",
     "displayName": "Gotify MCP",
-    "shortDescription": "Send and manage Gotify push notifications via MCP tools",
-    "longDescription": "gotify-mcp provides MCP tools for sending push notifications and managing Gotify applications, clients, and messages. Supports dual transport (HTTP and stdio) with bearer auth.",
-    "category": "infrastructure",
-    "capabilities": ["notifications", "messaging", "push", "homelab"],
+    "shortDescription": "Send and manage Gotify push notifications",
+    "longDescription": "Send push notifications and manage Gotify applications, clients, and messages through MCP tools and bundled skills.",
+    "developerName": "Jacob Magar",
+    "category": "Utilities",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/jmagar/gotify-mcp",
+    "defaultPrompt": [
+      "Send a Gotify alert when this task finishes.",
+      "List my Gotify applications and clients.",
+      "Review recent Gotify messages."
+    ],
     "brandColor": "#7B44F2",
-    "composerIcon": "assets/icon.png",
-    "logo": "assets/logo.svg",
-    "screenshots": []
+    "composerIcon": "./assets/icon.png",
+    "logo": "./assets/logo.svg"
+  },
+  "author": {
+    "name": "Jacob Magar",
+    "email": "jmagar@users.noreply.github.com",
+    "url": "https://github.com/jmagar"
   }
 }
