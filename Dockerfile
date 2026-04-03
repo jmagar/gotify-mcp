@@ -9,16 +9,16 @@ WORKDIR /app
 
 # Install dependencies first (layer cache)
 COPY pyproject.toml uv.lock README.md ./
-RUN uv sync --frozen --no-dev --no-install-project
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-dev --no-install-project
 
 # Copy source and install project
 COPY gotify_mcp/ ./gotify_mcp/
-RUN uv sync --frozen --no-dev
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-dev
 
 # ── runtime ──────────────────────────────────────────────────────────────────
 FROM python:3.12-slim AS runtime
-
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 RUN groupadd --gid 1000 mcpuser && \
     useradd --uid 1000 --gid mcpuser --shell /bin/bash --create-home mcpuser
@@ -41,9 +41,12 @@ USER 1000:1000
 
 EXPOSE 9158
 
-ENV GOTIFY_MCP_HOST=0.0.0.0
-ENV GOTIFY_MCP_PORT=9158
-ENV GOTIFY_MCP_TRANSPORT=http
+ENV PATH="/app/.venv/bin:$PATH" \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    GOTIFY_MCP_HOST=0.0.0.0 \
+    GOTIFY_MCP_PORT=9158 \
+    GOTIFY_MCP_TRANSPORT=http
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
     CMD python -c "import os, sys, urllib.request; port = os.environ.get('GOTIFY_MCP_PORT', '9158'); \
