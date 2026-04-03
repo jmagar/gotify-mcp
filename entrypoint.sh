@@ -40,4 +40,4 @@ echo "  - MCP_TRANSPORT: $GOTIFY_MCP_TRANSPORT"
 echo "  - LOG_LEVEL: $GOTIFY_LOG_LEVEL"
 
 echo "Gotify MCP Service: Starting server..."
-exec uv run python -m gotify_mcp.server
+exec python -m gotify_mcp.server
