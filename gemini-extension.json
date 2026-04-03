@@ -1,0 +1,32 @@
+{
+  "name": "gotify-mcp",
+  "version": "1.0.0",
+  "description": "Gotify push notification server management via MCP tools. Send notifications, manage applications and clients.",
+  "mcpServers": {
+    "gotify-mcp": {
+      "command": "uv",
+      "args": ["run", "gotify-mcp-server"],
+      "cwd": "${extensionPath}"
+    }
+  },
+  "settings": [
+    {
+      "name": "Gotify URL",
+      "description": "URL of your Gotify server (e.g., https://gotify.example.com)",
+      "envVar": "GOTIFY_URL",
+      "sensitive": false
+    },
+    {
+      "name": "Gotify Client Token",
+      "description": "Client token for reading messages and managing resources",
+      "envVar": "GOTIFY_CLIENT_TOKEN",
+      "sensitive": true
+    },
+    {
+      "name": "Gotify App Token",
+      "description": "Application token for sending push notifications",
+      "envVar": "GOTIFY_APP_TOKEN",
+      "sensitive": true
+    }
+  ]
+}
