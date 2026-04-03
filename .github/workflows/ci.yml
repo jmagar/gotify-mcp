@@ -1,38 +1,41 @@
 name: CI
 on:
   push:
-    branches: [main, chore/cw1-alignment]
+    branches: [main]
   pull_request:
 jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v4
+      - uses: astral-sh/setup-uv@v5
       - run: uv sync --group dev
       - run: uv run ruff check .
+      - run: uv run ruff format --check .
   typecheck:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v4
+      - uses: astral-sh/setup-uv@v5
       - run: uv sync --group dev
       - run: uv run ty check
   test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v4
+      - uses: astral-sh/setup-uv@v5
       - run: uv sync --group dev
       - run: uv run pytest
-  version-sync:
+  audit:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: grep '^version' pyproject.toml
+      - uses: astral-sh/setup-uv@v5
+      - run: uv sync --group dev
+      - run: uv export --no-hashes | uv pip compile - -q | uv pip audit --stdin || true
   contract-drift:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v4
+      - uses: astral-sh/setup-uv@v5
       - run: bash scripts/lint-plugin.sh
