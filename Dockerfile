@@ -8,7 +8,8 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 WORKDIR /app
 
 # Install dependencies first (layer cache)
-COPY pyproject.toml uv.lock README.md ./
+COPY pyproject.toml uv.lock ./
+RUN touch README.md
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-dev --no-install-project
 
@@ -29,7 +30,6 @@ WORKDIR /app
 COPY --from=builder /app/.venv /app/.venv
 COPY --from=builder /app/gotify_mcp /app/gotify_mcp
 COPY --from=builder /app/pyproject.toml /app/pyproject.toml
-COPY --from=builder /app/README.md /app/README.md
 
 # Copy entrypoint and set up log directory
 COPY entrypoint.sh ./
