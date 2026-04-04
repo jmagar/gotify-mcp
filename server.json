@@ -1,6 +1,6 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
-  "name": "io.github.jmagar/gotify-mcp",
+  "name": "tv.tootie/gotify-mcp",
   "title": "Gotify MCP",
   "description": "MCP server for self-hosted Gotify push notifications and message management.",
   "repository": {
