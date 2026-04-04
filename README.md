@@ -1,109 +1,137 @@
-# Gotify MCP Server
+# Gotify MCP
 
-> **Streamlined notification management for Gotify via the Model Context Protocol.**
+MCP server for self-hosted Gotify. This repo exposes a unified `gotify` action router and a `gotify_help` companion tool for sending notifications and managing Gotify messages, applications, clients, and account metadata.
 
-[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](CHANGELOG.md)
-[![Python Version](https://img.shields.io/badge/python-3.10+-green.svg)](https://www.python.org/downloads/)
-[![FastMCP](https://img.shields.io/badge/FastMCP-Enabled-brightgreen.svg)](https://github.com/jlowin/fastmcp)
-[![License](https://img.shields.io/badge/license-MIT-purple.svg)](LICENSE)
+## What this repository ships
 
----
+- `gotify_mcp/`: FastMCP server and Gotify API service client
+- `skills/gotify/`: client-facing skill docs
+- `docs/gotify-api.json`: bundled upstream API reference
+- `.claude-plugin/`, `.codex-plugin/`, `gemini-extension.json`: client manifests
+- `docker-compose.yml`, `Dockerfile`, `entrypoint.sh`: container deployment
+- `scripts/`: smoke tests and contract checks
 
-## ✨ Overview
-Gotify MCP provides a unified toolset for interacting with your self-hosted Gotify instance. It enables AI assistants to send notifications, manage applications and clients, and monitor server health through a secure, local-first interface.
+## MCP surface
 
-### 🎯 Key Features
-| Feature | Description |
-|---------|-------------|
-| **Notification Engine** | Create messages with title, priority, and extras |
-| **App Management** | Create, update, and rotate application tokens |
-| **Client Control** | List and manage receiving clients |
-| **User Context** | Built-in resource for current authenticated user info |
+### Main tools
 
----
+| Tool | Purpose |
+| --- | --- |
+| `gotify` | Unified action router for notifications, apps, clients, and health |
+| `gotify_help` | Markdown help for actions and parameters |
 
-## 🎯 Claude Code Integration
-The easiest way to use this plugin is through the Claude Code marketplace:
+### Supported actions
+
+| Action | Purpose |
+| --- | --- |
+| `send_message` | Send a push notification using an app token |
+| `list_messages` | List messages |
+| `delete_message` | Delete one message |
+| `delete_all_messages` | Delete all messages |
+| `list_applications` | List apps |
+| `create_application` | Create an app |
+| `update_application` | Update an app |
+| `delete_application` | Delete an app |
+| `list_clients` | List clients |
+| `create_client` | Create a client |
+| `delete_client` | Delete a client |
+| `health` | Check server health |
+| `version` | Get Gotify version |
+| `current_user` | Get current authenticated user |
+
+Destructive actions are gated by `confirm=true` unless the server is configured to allow them automatically.
+
+## Installation
+
+### Marketplace
 
 ```bash
-# Add the marketplace
 /plugin marketplace add jmagar/claude-homelab
-
-# Install the plugin
 /plugin install gotify-mcp @jmagar-claude-homelab
 ```
 
----
+### Local development
 
-## ⚙️ Configuration & Credentials
-Credentials follow the standardized `homelab-core` pattern.
-
-**Location:** `~/.claude-homelab/.env`
-
-### Required Variables
 ```bash
-GOTIFY_API_URL="https://gotify.example.com"
-GOTIFY_CLIENT_TOKEN="YOUR_ADMIN_CLIENT_TOKEN"
-GOTIFY_MCP_LOG_LEVEL="INFO"
+uv sync --dev
+uv run gotify-mcp-server
 ```
 
-> **Security Note:** Never commit `.env` files. Ensure permissions are set to `chmod 600`.
+Equivalent direct module run:
 
----
-
-## 🛠️ Available Tools & Resources
-
-### 🔧 Primary Tools
-| Tool | Parameters | Description |
-|------|------------|-------------|
-| **`create_message`** | `app_token`, `message`, `priority` | Send a new notification |
-| **`get_messages`** | `limit`, `since` | Retrieve recent message history |
-| **`create_application`**| `name`, `description` | Manage sending applications |
-| **`get_health`** | `none` | Monitor Gotify server status |
-
-### 📊 Resources (`gotify://`)
-| URI | Description | Output Format |
-|-----|-------------|---------------|
-| `gotify://currentuser` | Authenticated user details | JSON |
-| `gotify://application/{id}/messages`| Application-specific message feed | List |
-
----
-
-## 🏗️ Architecture & Design
-This server implements the core Gotify API using an async `httpx` engine:
-- **Shared Request Helper:** Centralized error handling and authentication parsing.
-- **FastMCP SSE/HTTP:** Configurable transport for diverse MCP client requirements.
-- **Resource Routing:** Direct mapping to user and application message feeds.
-
----
-
-## 🔧 Development
-### Prerequisites
-- Python 3.10+
-- [uv](https://github.com/astral-sh/uv) package manager
-
-### Setup
 ```bash
-uv sync
-uv run python gotify_mcp_server.py
+uv run python -m gotify_mcp.server
 ```
 
-### Transport Options
+## Configuration
+
+Create `.env` from `.env.example` and set:
+
 ```bash
-# Set transport via env var
-GOTIFY_MCP_TRANSPORT="http" # 'http', 'sse', or 'stdio'
+GOTIFY_URL=https://your-gotify-instance.example.com
+GOTIFY_CLIENT_TOKEN=your_gotify_client_token
+GOTIFY_APP_TOKEN=your_gotify_app_token
+GOTIFY_MCP_HOST=0.0.0.0
+GOTIFY_MCP_PORT=9158
+GOTIFY_MCP_TRANSPORT=http
+GOTIFY_MCP_TOKEN=...
+GOTIFY_MCP_NO_AUTH=false
+GOTIFY_LOG_LEVEL=INFO
 ```
 
----
+Notes:
 
-## 🐛 Troubleshooting
-| Issue | Cause | Solution |
-|-------|-------|----------|
-| **401 Unauthorized** | Token Mismatch | Verify `GOTIFY_CLIENT_TOKEN` |
-| **Connection Refused**| Bind Address | Check `GOTIFY_MCP_HOST` / `PORT` |
-| **Failed Messages** | Invalid App Token | Use correct token for `create_message` |
+- `GOTIFY_URL` is required or the server exits at startup.
+- `GOTIFY_CLIENT_TOKEN` is required for management actions.
+- `GOTIFY_APP_TOKEN` is used when sending notifications.
+- `GOTIFY_MCP_TRANSPORT` supports `http` and `stdio`.
 
----
+## Typical operations
 
-## 📄 License
-MIT © jmagar
+```text
+gotify action=send_message app_token=... message="Build finished" priority=5
+gotify action=list_messages limit=20
+gotify action=list_applications
+gotify action=current_user
+gotify_help
+```
+
+## Development commands
+
+```bash
+just dev
+just lint
+just fmt
+just typecheck
+just test
+just up
+just logs
+just health
+```
+
+## Verification
+
+Recommended:
+
+```bash
+just lint
+just typecheck
+just test
+```
+
+Optional live verification:
+
+```bash
+just test-live
+```
+
+## Related files
+
+- `gotify_mcp/server.py`: MCP server and action router
+- `gotify_mcp/services/`: Gotify API client logic
+- `docs/gotify-api.json`: upstream reference snapshot
+- `skills/gotify/`: client guidance
+
+## License
+
+MIT
