@@ -1,0 +1,49 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.jmagar/gotify-mcp",
+  "title": "Gotify MCP",
+  "description": "MCP server for self-hosted Gotify push notifications and message management.",
+  "repository": {
+    "url": "https://github.com/jmagar/gotify-mcp",
+    "source": "github"
+  },
+  "version": "0.2.2",
+  "packages": [
+    {
+      "registryType": "pypi",
+      "registryBaseUrl": "https://pypi.org",
+      "identifier": "gotify-mcp",
+      "version": "0.2.2",
+      "runtimeHint": "uvx",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "GOTIFY_URL",
+          "description": "Base URL of your Gotify server, e.g. https://gotify.example.com. No trailing slash.",
+          "isRequired": true,
+          "isSecret": false
+        },
+        {
+          "name": "GOTIFY_APP_TOKEN",
+          "description": "Gotify application token for sending messages (Settings > Apps > Create Application).",
+          "isRequired": false,
+          "isSecret": true
+        },
+        {
+          "name": "GOTIFY_CLIENT_TOKEN",
+          "description": "Gotify client token for management operations (Settings > Clients).",
+          "isRequired": false,
+          "isSecret": true
+        },
+        {
+          "name": "GOTIFY_MCP_TRANSPORT",
+          "description": "Set to 'stdio' when running as a local subprocess. Default is 'http' for container deployments.",
+          "isRequired": false,
+          "isSecret": false
+        }
+      ]
+    }
+  ]
+}

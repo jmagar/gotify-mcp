@@ -1,5 +1,7 @@
 # Gotify MCP
 
+<!-- mcp-name: io.github.jmagar/gotify-mcp -->
+
 MCP server for self-hosted Gotify. Exposes a unified `gotify` action router and a `gotify_help` companion tool for sending notifications and managing Gotify messages, applications, clients, and account metadata.
 
 ## Overview

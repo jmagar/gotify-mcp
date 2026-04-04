@@ -41,6 +41,8 @@ USER 1000:1000
 
 EXPOSE 9158
 
+LABEL io.modelcontextprotocol.server.name="io.github.jmagar/gotify-mcp"
+
 ENV PATH="/app/.venv/bin:$PATH" \
     PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
