@@ -2,6 +2,8 @@
 
 <!-- mcp-name: tv.tootie/gotify-mcp -->
 
+[![PyPI](https://img.shields.io/pypi/v/gotify-mcp)](https://pypi.org/project/gotify-mcp/) [![ghcr.io](https://img.shields.io/badge/ghcr.io-jmagar%2Fgotify--mcp-blue?logo=docker)](https://github.com/jmagar/gotify-mcp/pkgs/container/gotify-mcp)
+
 MCP server for self-hosted Gotify. Exposes a unified `gotify` action router and a `gotify_help` companion tool for sending notifications and managing Gotify messages, applications, clients, and account metadata.
 
 ## Overview
