@@ -1,6 +1,6 @@
 {
   "name": "gotify-mcp",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Gotify push notifications and management via MCP tools with HTTP fallback. Sends alerts for long-running tasks, plan completions, and blocked states.",
   "author": {
     "name": "Jacob Magar"

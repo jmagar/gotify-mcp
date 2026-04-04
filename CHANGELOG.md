@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-04-04
+
+### Security
+- **CVE-2026-32871** (CRITICAL): upgrade `fastmcp` to `>=3.2.0` — fixes SSRF & Path Traversal in OpenAPI provider
+- **CVE-2026-27124** (HIGH): upgrade `fastmcp` to `>=3.2.0` — fixes missing consent verification in OAuth proxy callback
+- Add `ignore-unfixed: true` to Trivy scan — suppresses OS-level CVEs with no upstream fix available
+
 ## [0.3.0] - 2026-04-04
 
 ### Added
