@@ -1,6 +1,6 @@
 {
   "name": "gotify-mcp",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "description": "Gotify push notification server management via MCP tools. Send notifications, manage applications and clients.",
   "mcpServers": {
     "gotify-mcp": {

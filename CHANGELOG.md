@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-04-04
+
+### Added
+- **MCP Registry publishing**: `server.json` conforming to the official MCP Registry schema; published as `tv.tootie/gotify-mcp`
+- **Automated registry CI**: `publish-pypi.yml` extended to authenticate via DNS (tootie.tv Ed25519 key) and publish to `registry.modelcontextprotocol.io` after each PyPI release
+- **PyPI ownership verification**: `<!-- mcp-name: tv.tootie/gotify-mcp -->` comment in README for registry validation
+- **OCI discoverability label**: `io.modelcontextprotocol.server.name` LABEL added to Dockerfile
+
 ## [0.2.2] - 2026-04-03
 
 ### Fixed
