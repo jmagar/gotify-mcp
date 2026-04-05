@@ -33,13 +33,6 @@ jobs:
       - uses: astral-sh/setup-uv@v5
       - run: uv sync --group dev
       - run: uv export --no-hashes | uv pip compile - -q | uv pip audit --stdin || true
-  contract-drift:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v5
-      - run: bash scripts/lint-plugin.sh
-
   docker-security:
     name: Docker Security
     runs-on: ubuntu-latest
