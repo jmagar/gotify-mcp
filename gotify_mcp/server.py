@@ -439,7 +439,7 @@ def main() -> None:
     else:
         # BearerAuth skipped when GOTIFY_MCP_NO_AUTH=true (OAuth handled at gateway)
         if not GOTIFY_MCP_NO_AUTH:
-            mcp.app.add_middleware(BearerAuthMiddleware)
+            mcp.app.add_middleware(BearerAuthMiddleware)  # type: ignore
         mcp.run(
             transport="streamable-http",
             host=GOTIFY_MCP_HOST,
