@@ -18,13 +18,15 @@ import logging.handlers
 import os
 import sys
 from pathlib import Path
-from typing import Any, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 from dotenv import load_dotenv
 from fastmcp import FastMCP
 from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.requests import Request
 from starlette.responses import JSONResponse
+
+if TYPE_CHECKING:
+    from starlette.requests import Request
 
 from gotify_mcp.services.gotify import GotifyClient
 
@@ -38,9 +40,7 @@ load_dotenv(dotenv_path=REPO_ROOT / ".env")
 # ---------------------------------------------------------------------------
 # Logging
 # ---------------------------------------------------------------------------
-GOTIFY_LOG_LEVEL_STR = os.getenv(
-    "GOTIFY_LOG_LEVEL", os.getenv("LOG_LEVEL", "INFO")
-).upper()
+GOTIFY_LOG_LEVEL_STR = os.getenv("GOTIFY_LOG_LEVEL", os.getenv("LOG_LEVEL", "INFO")).upper()
 NUMERIC_LOG_LEVEL = getattr(logging, GOTIFY_LOG_LEVEL_STR, logging.INFO)
 
 logger = logging.getLogger("GotifyMCPServer")
@@ -49,9 +49,7 @@ logger.propagate = False
 
 _console = logging.StreamHandler(sys.stdout)
 _console.setLevel(NUMERIC_LOG_LEVEL)
-_console.setFormatter(
-    logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-)
+_console.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s"))
 if not any(isinstance(h, logging.StreamHandler) for h in logger.handlers):
     logger.addHandler(_console)
 
@@ -64,14 +62,11 @@ _file_handler = logging.handlers.RotatingFileHandler(
     encoding="utf-8",
 )
 _file_handler.setLevel(NUMERIC_LOG_LEVEL)
-_file_handler.setFormatter(
-    logging.Formatter(
-        "%(asctime)s - %(name)s - %(levelname)s - %(module)s - %(funcName)s - %(lineno)d - %(message)s"
-    )
+_LOG_FORMAT = (
+    "%(asctime)s - %(name)s - %(levelname)s - %(module)s - %(funcName)s - %(lineno)d - %(message)s"
 )
-if not any(
-    isinstance(h, logging.handlers.RotatingFileHandler) for h in logger.handlers
-):
+_file_handler.setFormatter(logging.Formatter(_LOG_FORMAT))
+if not any(isinstance(h, logging.handlers.RotatingFileHandler) for h in logger.handlers):
     logger.addHandler(_file_handler)
 
 # ---------------------------------------------------------------------------
@@ -223,12 +218,14 @@ async def gotify(
 
     Actions:
       send_message        — send a notification (requires app_token, message)
-      list_messages       — list messages (optional: app_id, offset, limit, sort_by, sort_order, query)
+      list_messages       — list messages (optional: app_id, offset, limit,
+                            sort_by, sort_order, query)
       delete_message      — delete one message (requires message_id) [destructive]
       delete_all_messages — delete all messages [destructive]
       list_applications   — list apps (optional: offset, limit, query)
       create_application  — create app (requires name; optional: description, default_priority)
-      update_application  — update app (requires app_id; optional: name, description, default_priority)
+      update_application  — update app (requires app_id; optional: name, description,
+                            default_priority)
       delete_application  — delete app (requires app_id) [destructive]
       list_clients        — list clients (optional: offset, limit, query)
       create_client       — create client (requires name)
@@ -274,9 +271,7 @@ async def gotify(
             result = await _client.delete_all_messages()
 
         case "list_applications":
-            result = await _client.list_applications(
-                offset=offset, limit=limit, query=query
-            )
+            result = await _client.list_applications(offset=offset, limit=limit, query=query)
 
         case "create_application":
             if not name:
@@ -329,9 +324,7 @@ async def gotify(
             result = await _client.get_current_user()
 
         case _:
-            return _json(
-                {"error": f"Unknown action: {action}. Call gotify_help for reference."}
-            )
+            return _json({"error": f"Unknown action: {action}. Call gotify_help for reference."})
 
     return _json(result)
 

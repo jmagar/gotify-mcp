@@ -5,9 +5,10 @@ All HTTP calls live here; the MCP tool handler stays thin.
 
 from __future__ import annotations
 
-import re
-import os
+import contextlib
 import logging
+import os
+import re
 from typing import Any
 
 import httpx
@@ -22,9 +23,7 @@ logger = logging.getLogger("GotifyMCPServer")
 
 def is_docker() -> bool:
     """Detect if running inside a Docker container."""
-    return os.path.exists("/.dockerenv") or os.environ.get(
-        "RUNNING_IN_DOCKER", ""
-    ).lower() in (
+    return os.path.exists("/.dockerenv") or os.environ.get("RUNNING_IN_DOCKER", "").lower() in (
         "true",
         "1",
     )
@@ -54,9 +53,7 @@ def normalize_service_url(url: str) -> str:
 class GotifyClient:
     """Async HTTP client for the Gotify REST API."""
 
-    def __init__(
-        self, base_url: str, client_token: str | None, timeout: float = 20.0
-    ) -> None:
+    def __init__(self, base_url: str, client_token: str | None, timeout: float = 20.0) -> None:
         self.base_url = normalize_service_url(base_url.rstrip("/"))
         self.client_token = client_token
         self.timeout = timeout
@@ -111,9 +108,7 @@ class GotifyClient:
                 return {
                     "error": err.get("error", f"HTTP {e.response.status_code}"),
                     "errorCode": err.get("errorCode", e.response.status_code),
-                    "errorDescription": err.get(
-                        "errorDescription", "Failed to call Gotify API."
-                    ),
+                    "errorDescription": err.get("errorDescription", "Failed to call Gotify API."),
                 }
             except httpx.RequestError as e:
                 logger.error("Request error for %s %s: %s", method, url, e)
@@ -173,18 +168,13 @@ class GotifyClient:
             messages = [
                 m
                 for m in messages
-                if q in (m.get("message") or "").lower()
-                or q in (m.get("title") or "").lower()
+                if q in (m.get("message") or "").lower() or q in (m.get("title") or "").lower()
             ]
 
         # Sort
         reverse = sort_order.lower() == "desc"
-        try:
-            messages = sorted(
-                messages, key=lambda m: m.get(sort_by, 0), reverse=reverse
-            )
-        except (TypeError, KeyError):
-            pass
+        with contextlib.suppress(TypeError, KeyError):
+            messages = sorted(messages, key=lambda m: m.get(sort_by, 0), reverse=reverse)
 
         return {
             "items": messages,
