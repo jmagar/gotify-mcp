@@ -4,8 +4,6 @@
 !.env.example
 
 # ── Runtime artifacts ────────────────────────────────────────────────────────
-logs/
-backups/
 *.log
 *.pid
 *.bak
@@ -90,3 +88,6 @@ backups/*
 logs/*
 !logs/.gitkeep
 .worktrees
+
+# Personal local cheatsheet (never commit)
+CLAUDE.md.local
