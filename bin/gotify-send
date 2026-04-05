@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# gotify-send — send a Gotify push notification from the command line
+#
+# Usage:
+#   gotify-send "Title" "Message"
+#   gotify-send "Title" "Message" 5          # priority 1-10 (default: 5)
+#
+# Environment variables (loaded from .env if present):
+#   GOTIFY_URL       — e.g. https://gotify.example.com
+#   GOTIFY_APP_TOKEN — application token for sending messages
+
+set -euo pipefail
+
+# ─── Load .env if available ──────────────────────────────────────────────────
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ENV_FILE="${SCRIPT_DIR}/../.env"
+if [[ -f "$ENV_FILE" ]]; then
+    # shellcheck disable=SC1090
+    set -a; source "$ENV_FILE"; set +a
+fi
+
+# ─── Validate env ────────────────────────────────────────────────────────────
+: "${GOTIFY_URL:?GOTIFY_URL is not set}"
+: "${GOTIFY_APP_TOKEN:?GOTIFY_APP_TOKEN is not set}"
+
+# ─── Parse args ──────────────────────────────────────────────────────────────
+if [[ $# -lt 2 ]]; then
+    echo "Usage: gotify-send <title> <message> [priority]" >&2
+    exit 1
+fi
+
+TITLE="$1"
+MESSAGE="$2"
+PRIORITY="${3:-5}"
+
+# ─── Send ────────────────────────────────────────────────────────────────────
+RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
+    -X POST "${GOTIFY_URL%/}/message" \
+    -H "X-Gotify-Key: $GOTIFY_APP_TOKEN" \
+    -H "Content-Type: application/json" \
+    -d "{\"title\": $(printf '%s' "$TITLE" | jq -Rs .), \"message\": $(printf '%s' "$MESSAGE" | jq -Rs .), \"priority\": $PRIORITY}")
+
+if [[ "$RESPONSE" == "200" ]]; then
+    echo "sent"
+else
+    echo "error: HTTP $RESPONSE" >&2
+    exit 1
+fi

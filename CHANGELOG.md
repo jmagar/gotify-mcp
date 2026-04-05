@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.2] - 2026-04-04
+
+### Added
+- Full documentation structure with references, troubleshooting, and quick-reference guides
+- `tests/TEST_COVERAGE.md` documenting test coverage status
+
 ## [0.3.1] - 2026-04-04
 
 ### Security
