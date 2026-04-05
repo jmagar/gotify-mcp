@@ -82,32 +82,94 @@ check_prereqs() {
 # Core HTTP helpers
 # ---------------------------------------------------------------------------
 
-# mcp_post <path> <json-body>
-# Posts JSON-RPC to the MCP server with Bearer auth.
-# Handles SSE "data: " prefix and returns parsed JSON body.
-mcp_post() {
+# Session ID for FastMCP 3.x streamable-HTTP.
+# Populated by calling: mcp_session_init <path> <body> (not via subshell).
+MCP_SESSION_ID=""
+
+# _sse_extract_json <raw-sse-body>
+# Extracts the JSON payload from an SSE response body.
+# Handles FastMCP 3.x where the data: line may contain literal newlines in
+# JSON strings (non-standard SSE). Collects all content after "data: " up to
+# the terminating blank line and strips the "data: " prefix.
+_sse_extract_json() {
+    local raw="$1"
+    # Use python3 to robustly extract: find "data: " prefix and collect
+    # everything from there to end of SSE event (blank line terminator).
+    # Falls back to returning raw if no data: found.
+    printf '%s' "$raw" | python3 -c "
+import sys
+content = sys.stdin.read()
+# Find first 'data: ' occurrence
+idx = content.find('data: ')
+if idx == -1:
+    print(content, end='')
+else:
+    # Extract everything from after 'data: ' to end of event
+    payload = content[idx + 6:]
+    # Trim trailing whitespace/newlines
+    payload = payload.rstrip('\r\n ')
+    # Remove any trailing SSE event separator
+    if payload.endswith('\r\n\r\n'):
+        payload = payload[:-4]
+    elif payload.endswith('\n\n'):
+        payload = payload[:-2]
+    print(payload, end='')
+" 2>/dev/null || printf '%s' "$raw"
+}
+
+# mcp_session_init <path> <body>
+# Sends an initialize request, captures mcp-session-id into MCP_SESSION_ID,
+# and stores the parsed response JSON in _MCP_INIT_RESP (global).
+# Must be called directly (NOT via $(...)) so MCP_SESSION_ID propagates.
+_MCP_INIT_RESP=""
+mcp_session_init() {
     local path="$1"
     local body="$2"
+    local hdr_file
+    hdr_file=$(mktemp)
     local raw
-    raw=$(curl -sf \
+    raw=$(curl -sf -D "${hdr_file}" \
         -X POST \
         -H "Authorization: Bearer ${TOKEN}" \
         -H "Content-Type: application/json" \
         -H "Accept: application/json, text/event-stream" \
         --data-raw "$body" \
         "${BASE_URL}${path}" 2>&1) || {
+        _MCP_INIT_RESP='{"_curl_error": true}'
+        rm -f "${hdr_file}"
+        return 0
+    }
+    MCP_SESSION_ID=$(grep -i '^mcp-session-id:' "${hdr_file}" | awk '{print $2}' | tr -d '\r')
+    rm -f "${hdr_file}"
+    verbose "Captured mcp-session-id: $MCP_SESSION_ID"
+    _MCP_INIT_RESP=$(_sse_extract_json "$raw")
+}
+
+# mcp_post <path> <json-body>
+# Posts JSON-RPC to the MCP server with Bearer auth.
+# Sends mcp-session-id header if MCP_SESSION_ID is set.
+# Handles SSE "data: " prefix (including multi-line payloads) and returns JSON.
+mcp_post() {
+    local path="$1"
+    local body="$2"
+    local extra_headers=()
+    if [[ -n "$MCP_SESSION_ID" ]]; then
+        extra_headers+=(-H "mcp-session-id: ${MCP_SESSION_ID}")
+    fi
+    local raw
+    raw=$(curl -sf \
+        -X POST \
+        -H "Authorization: Bearer ${TOKEN}" \
+        -H "Content-Type: application/json" \
+        -H "Accept: application/json, text/event-stream" \
+        "${extra_headers[@]}" \
+        --data-raw "$body" \
+        "${BASE_URL}${path}" 2>&1) || {
         echo '{"_curl_error": true}'
         return 0
     }
     verbose "RAW: $raw"
-    # Strip SSE data: prefix if present (FastMCP streamable-http)
-    local stripped
-    stripped=$(echo "$raw" | grep -E '^data: ' | sed 's/^data: //' | head -1)
-    if [[ -n "$stripped" ]]; then
-        echo "$stripped"
-    else
-        echo "$raw"
-    fi
+    _sse_extract_json "$raw"
 }
 
 # assert_jq <label> <json> <jq-filter> <expected>
@@ -165,7 +227,8 @@ MCP_REQUEST_ID=1
 
 call_tool() {
     local tool="$1"
-    local args="${2:-{}}"
+    local args="${2:-}"
+    [[ -z "$args" ]] && args='{}'
     (( MCP_REQUEST_ID++ )) || true
 
     local payload
@@ -258,12 +321,15 @@ run_http_tests() {
     # ---------------------------------------------------------------------------
     section "Phase 3 — MCP protocol"
 
-    # initialize
+    # initialize — call mcp_session_init directly (not via subshell) so
+    # MCP_SESSION_ID is set in the current shell for subsequent requests.
     (( MCP_REQUEST_ID++ )) || true
-    local init_resp
-    init_resp=$(mcp_post "/mcp" \
-        "{\"jsonrpc\":\"2.0\",\"id\":${MCP_REQUEST_ID},\"method\":\"initialize\",\"params\":{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{},\"clientInfo\":{\"name\":\"test-live\",\"version\":\"1\"}}}")
+    MCP_SESSION_ID=""
+    mcp_session_init "/mcp" \
+        "{\"jsonrpc\":\"2.0\",\"id\":${MCP_REQUEST_ID},\"method\":\"initialize\",\"params\":{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{},\"clientInfo\":{\"name\":\"test-live\",\"version\":\"1\"}}}"
+    local init_resp="$_MCP_INIT_RESP"
     verbose "Init: $init_resp"
+    verbose "Session ID: $MCP_SESSION_ID"
     assert_jq_contains "initialize → serverInfo.name contains 'gotify'" \
         "$init_resp" '.result.serverInfo.name' "gotify"
 
