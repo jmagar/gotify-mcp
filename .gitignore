@@ -84,3 +84,9 @@ coverage.xml
 .tox/
 .nox/
 pip-log.txt
+
+backups/*
+!backups/.gitkeep
+logs/*
+!logs/.gitkeep
+.worktrees
