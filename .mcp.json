@@ -1,8 +1,15 @@
 {
   "mcpServers": {
     "gotify-mcp": {
-      "type": "http",
-      "url": "${GOTIFY_MCP_URL}"
+      "command": "uv",
+      "args": [
+        "run",
+        "gotify-mcp-server"
+      ],
+      "cwd": "./",
+      "env": {
+        "GOTIFY_MCP_TRANSPORT": "stdio"
+      }
     }
   }
 }
