@@ -405,17 +405,20 @@ async def gotify_help() -> str:
 
 @mcp.custom_route("/health", methods=["GET"])
 async def mcp_server_health(request: Request) -> JSONResponse:
-    """MCP server health check."""
+    """MCP server health check.
+
+    Always returns HTTP 200 with status=ok when the server process is running.
+    Gotify upstream connectivity is reported in the 'gotify' field but does not
+    affect the HTTP status code — downstream unavailability is not a server fault.
+    """
     if not GOTIFY_URL:
         return JSONResponse(
-            {"status": "error", "reason": "GOTIFY_URL not configured."},
-            status_code=500,
+            {"status": "ok", "gotify": {"reachable": False, "reason": "GOTIFY_URL not configured"}},
         )
     health = await _client.get_health()
     if "error" in health:
         return JSONResponse(
-            {"status": "error", "reason": health["error"]},
-            status_code=503,
+            {"status": "ok", "gotify": {"reachable": False, "reason": health["error"]}},
         )
     return JSONResponse({"status": "ok", "gotify": health})
 
