@@ -22,6 +22,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 from dotenv import load_dotenv
 from fastmcp import FastMCP
+from starlette.middleware import Middleware
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
 
@@ -441,13 +442,13 @@ def main() -> None:
         mcp.run(transport="stdio")
     else:
         # BearerAuth skipped when GOTIFY_MCP_NO_AUTH=true (OAuth handled at gateway)
-        if not GOTIFY_MCP_NO_AUTH:
-            mcp.app.add_middleware(BearerAuthMiddleware)  # type: ignore
+        http_middleware = None if GOTIFY_MCP_NO_AUTH else [Middleware(BearerAuthMiddleware)]
         mcp.run(
             transport="streamable-http",
             host=GOTIFY_MCP_HOST,
             port=GOTIFY_MCP_PORT,
             log_level=GOTIFY_LOG_LEVEL_STR.lower(),
+            middleware=http_middleware,
         )
 
 
