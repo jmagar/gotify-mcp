@@ -107,8 +107,6 @@ else
   REQUIRED_GIT=()
 
   # ── Runtime / hook artifacts ──
-  ensure_ordered_pair "$GITIGNORE" "backups/*" "!backups/.gitkeep" ".gitignore"
-  ensure_ordered_pair "$GITIGNORE" "logs/*" "!logs/.gitkeep" ".gitignore"
   REQUIRED_GIT+=(
     "*.log"
   )
