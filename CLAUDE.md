@@ -39,9 +39,9 @@ just build     # docker build
 - `gotify_mcp/server.py` — FastMCP server entry point, action+subaction pattern
 - `gotify_mcp/client.py` — Gotify HTTP API client
 - `entrypoint.sh` — Container entrypoint with env validation
-- `hooks/scripts/sync-env.sh` — Syncs userConfig to .env at session start
-- `hooks/scripts/ensure-ignore-files.sh` — Ensures .gitignore and .dockerignore have required patterns
-- `hooks/scripts/fix-env-perms.sh` — Enforces chmod 600 on .env
+The `sync-uv.sh` hook keeps the repository lockfile and persistent Python environment in sync at session start.
+
+- `bin/` — Enforces chmod 600 on .env
 
 
 ## Version Bumping

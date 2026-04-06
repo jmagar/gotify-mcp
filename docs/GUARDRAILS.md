@@ -4,14 +4,14 @@ Safety and security patterns enforced across the plugin.
 
 ## Credential management
 
-### Storage
+Storage
 
 - All credentials in `.env` with `chmod 600` permissions
 - Never commit `.env` or any file containing secrets
 - Use `.env.example` as a tracked template with placeholder values only
 - Generate tokens with `openssl rand -hex 32`
 
-### Gotify dual-token security
+Gotify dual-token security
 
 Gotify uses separate tokens for separate concerns:
 
@@ -22,7 +22,7 @@ Gotify uses separate tokens for separate concerns:
 
 Keep the client token restricted. Prefer app tokens when only sending notifications.
 
-### Ignore files
+Ignore files
 
 `.gitignore` and `.dockerignore` must include:
 
@@ -34,17 +34,16 @@ credentials.*
 *.key
 ```
 
-### Hook enforcement
+Hook enforcement
 
 Hooks verify security invariants at session start and after file operations:
 
 | Hook | Trigger | Purpose |
 | --- | --- | --- |
-| `sync-env.sh` | SessionStart | Syncs `userConfig` credentials to `.env` with file locking |
-| `fix-env-perms.sh` | PostToolUse (Write/Edit/Bash) | Sets `.env` to `chmod 600` if present |
-| `ensure-ignore-files.sh` | SessionStart | Verifies `.gitignore` and `.dockerignore` contain required patterns |
+The `sync-uv.sh` hook keeps the repository lockfile and persistent Python environment in sync at session start.
 
-### Credential rotation
+
+Credential rotation
 
 1. Generate new token: `openssl rand -hex 32`
 2. Update `.env` with new value
@@ -71,7 +70,7 @@ Server-wide bypass via `ALLOW_DESTRUCTIVE=true` or `ALLOW_YOLO=true` (automated 
 
 ## Docker security
 
-### Non-root execution
+Non-root execution
 
 The container runs as non-root (UID/GID 1000 by default):
 
@@ -83,7 +82,7 @@ USER 1000:1000
 
 Override with `PUID` and `PGID` environment variables.
 
-### No baked environment
+No baked environment
 
 The Docker image contains no credentials at build time:
 
@@ -97,7 +96,7 @@ Verify with:
 docker inspect gotify-mcp:latest | jq '.[0].Config.Env'
 ```
 
-### Image scanning
+Image scanning
 
 CI runs Trivy scans on every image push:
 
@@ -107,20 +106,20 @@ docker scout cves gotify-mcp:latest
 
 ## Network security
 
-### HTTPS in production
+HTTPS in production
 
 - `GOTIFY_URL` should use `https://` in production
 - Use valid TLS certificates (Let's Encrypt via SWAG or similar)
 - HTTP is acceptable only for local development
 
-### Bearer token authentication
+Bearer token authentication
 
 - HTTP transport requires `GOTIFY_MCP_TOKEN` by default
 - Token sent as `Authorization: Bearer <token>` header
 - Timing-safe comparison via `hmac.compare_digest`
 - Disable only behind a trusted reverse proxy (`GOTIFY_MCP_NO_AUTH=true`)
 
-### Health endpoint
+Health endpoint
 
 - `/health` is unauthenticated — required for container liveness probes
 - Returns only status information, never credentials or internal state
@@ -128,13 +127,13 @@ docker scout cves gotify-mcp:latest
 
 ## Input handling
 
-### Response truncation
+Response truncation
 
 - Responses truncated at 512 KB
 - Append `... [truncated]` marker to indicate truncation
 - Prevents unbounded upstream responses from consuming MCP context
 
-### Docker URL rewriting
+Docker URL rewriting
 
 When running inside Docker, `localhost` and `127.0.0.1` in `GOTIFY_URL` are automatically rewritten to `host.docker.internal` so the container can reach a host-side Gotify server.
 

@@ -14,16 +14,15 @@ gotify-mcp uses Claude Code plugin hooks (defined in `hooks/hooks.json`) rather 
     "SessionStart": [
       {
         "hooks": [
-          { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/sync-env.sh", "timeout": 10 },
-          { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/ensure-ignore-files.sh", "timeout": 5 }
+          { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/bin/sync-uv.sh", "timeout": 10 },
+
         ]
       }
     ],
-    "PostToolUse": [
       {
         "matcher": "Write|Edit|MultiEdit|Bash",
         "hooks": [
-          { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/fix-env-perms.sh", "timeout": 5 }
+          { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/bin/", "timeout": 5 }
         ]
       }
     ]
@@ -33,22 +32,21 @@ gotify-mcp uses Claude Code plugin hooks (defined in `hooks/hooks.json`) rather 
 
 ## Hook Scripts
 
-All scripts live in `hooks/scripts/`. Each exits non-zero on failure.
+All scripts live in `bin/`. Each exits non-zero on failure.
 
 | Script | Trigger | Purpose |
 |--------|---------|---------|
-| `sync-env.sh` | SessionStart | Syncs `userConfig` credentials to `.env` with file locking and backup |
-| `ensure-ignore-files.sh` | SessionStart | Verifies `.gitignore` and `.dockerignore` contain required patterns |
-| `fix-env-perms.sh` | PostToolUse | Sets `.env` to `chmod 600` after any file write or shell command |
+The `sync-uv.sh` hook keeps the repository lockfile and persistent Python environment in sync at session start.
+
 
 ## CI Enforcement
 
 The same security checks run in the `docker-security` CI job:
 
 ```bash
-bash scripts/check-docker-security.sh Dockerfile
-bash scripts/check-no-baked-env.sh .
-bash scripts/ensure-ignore-files.sh --check .
+
+
+
 ```
 
 Issues caught by hooks are also caught in CI even if a developer bypasses hooks.
@@ -58,10 +56,10 @@ Issues caught by hooks are also caught in CI even if a developer bypasses hooks.
 | Script | Purpose |
 |--------|---------|
 | `scripts/lint-plugin.sh` | Validates plugin manifests (schema, required fields, version sync) |
-| `scripts/check-docker-security.sh` | Lints Dockerfile: non-root user, no secrets |
-| `scripts/check-no-baked-env.sh` | Ensures no `ENV` directives contain secrets |
-| `scripts/ensure-ignore-files.sh` | Verifies `.env` appears in ignore files |
-| `scripts/check-outdated-deps.sh` | Warns on outdated dependencies (advisory) |
+
+
+
+
 
 ## Related Docs
 

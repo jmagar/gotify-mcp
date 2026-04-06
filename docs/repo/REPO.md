@@ -22,15 +22,15 @@ gotify-mcp/
 ├── hooks/
 │   ├── hooks.json               # Hook declarations
 │   └── scripts/
-│       ├── sync-env.sh          # Sync userConfig to .env
-│       ├── fix-env-perms.sh     # Enforce chmod 600 on .env
-│       └── ensure-ignore-files.sh
+The `sync-uv.sh` hook keeps the repository lockfile and persistent Python environment in sync at session start.
+│       ├──      # Enforce chmod 600 on .env
+
 ├── scripts/                     # Maintenance and CI scripts
 │   ├── lint-plugin.sh
-│   ├── check-docker-security.sh
-│   ├── check-no-baked-env.sh
-│   ├── ensure-ignore-files.sh
-│   ├── check-outdated-deps.sh
+
+
+
+
 │   └── smoke-test.sh
 ├── skills/
 │   └── gotify/
