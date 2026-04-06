@@ -86,7 +86,11 @@ ALLOW_DESTRUCTIVE = os.getenv("ALLOW_DESTRUCTIVE", "false").lower() == "true"
 ALLOW_YOLO = os.getenv("ALLOW_YOLO", "false").lower() == "true"
 
 if not GOTIFY_URL:
-    print("CRITICAL: GOTIFY_URL must be set in the environment.", file=sys.stderr)
+    print(
+        "CRITICAL: GOTIFY_URL must be set in the environment.\n"
+        "If running as a Claude Code plugin, set it in the plugin settings.",
+        file=sys.stderr,
+    )
     sys.exit(1)
 
 if GOTIFY_MCP_TRANSPORT != "stdio" and not GOTIFY_MCP_NO_AUTH and not GOTIFY_MCP_TOKEN:
@@ -101,6 +105,10 @@ if GOTIFY_MCP_TRANSPORT != "stdio" and not GOTIFY_MCP_NO_AUTH and not GOTIFY_MCP
 
 if not GOTIFY_CLIENT_TOKEN:
     logger.warning("GOTIFY_CLIENT_TOKEN is not set. Management actions will fail.")
+
+# Scrub sensitive credentials from process environment to reduce /proc exposure
+for _key in ("GOTIFY_CLIENT_TOKEN", "GOTIFY_APP_TOKEN", "GOTIFY_MCP_TOKEN"):
+    os.environ.pop(_key, None)
 
 # ---------------------------------------------------------------------------
 # Response size cap

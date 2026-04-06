@@ -4,11 +4,21 @@
       "command": "uv",
       "args": [
         "run",
+        "--project",
+        "${CLAUDE_PLUGIN_ROOT}",
         "gotify-mcp-server"
       ],
-      "cwd": "./",
       "env": {
-        "GOTIFY_MCP_TRANSPORT": "stdio"
+        "UV_PROJECT_ENVIRONMENT": "${CLAUDE_PLUGIN_DATA}/.venv",
+        "GOTIFY_MCP_TRANSPORT": "stdio",
+        "GOTIFY_MCP_NO_AUTH": "true",
+        "GOTIFY_URL": "${userConfig.gotify_url}",
+        "GOTIFY_CLIENT_TOKEN": "${userConfig.gotify_client_token}",
+        "GOTIFY_APP_TOKEN": "${userConfig.gotify_app_token}",
+        "GOTIFY_LOG_LEVEL": "INFO",
+        "ALLOW_DESTRUCTIVE": "false",
+        "ALLOW_YOLO": "false",
+        "RUNNING_IN_DOCKER": "false"
       }
     }
   }

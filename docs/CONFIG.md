@@ -2,17 +2,30 @@
 
 Complete environment variable reference and configuration options.
 
-## Environment file
+## Deployment paths
+
+| Path | Transport | Credentials source | Auth |
+|------|-----------|-------------------|------|
+| **Plugin (stdio)** | stdio | `userConfig` in plugin.json, interpolated via `.mcp.json` | None |
+| **Docker (HTTP)** | http | `.env` file | Bearer token (`GOTIFY_MCP_TOKEN`) |
+
+### Plugin quickstart
+
+Install the plugin in Claude Code. You will be prompted for:
+- **Gotify Server URL** — base URL of your Gotify server
+- **Gotify App Token** — for sending messages
+- **Gotify Client Token** — for management operations
+
+No `.env` file needed. See [plugin/CONFIG.md](plugin/CONFIG.md) for details.
+
+### Docker quickstart
 
 ```bash
 cp .env.example .env
 chmod 600 .env
+# Edit .env with your credentials
+docker compose up -d
 ```
-
-Precedence (highest to lowest):
-1. `.env` file in project root
-2. Container environment variables (Docker `environment:` or `-e` flags)
-3. System environment variables
 
 ## Environment variables
 
@@ -71,48 +84,6 @@ Gotify uses two separate token types. Using the wrong token type produces a 401 
 | **Client token** | Gotify UI: Settings > Clients > Create Client | All management operations: list/delete messages, manage apps and clients, current user. |
 
 The MCP server reads `GOTIFY_CLIENT_TOKEN` from the environment for management actions. The `app_token` for `send_message` is always passed explicitly per tool call.
-
-## Plugin userConfig
-
-When installed as a Claude Code plugin, these fields map to `userConfig` in `.claude-plugin/plugin.json`:
-
-```json
-{
-  "userConfig": {
-    "gotify_mcp_url": {
-      "type": "string",
-      "title": "Gotify MCP Server URL",
-      "description": "Full MCP endpoint URL (e.g. http://localhost:9158/mcp)",
-      "default": "https://gotify.tootie.tv/mcp",
-      "sensitive": false
-    },
-    "gotify_mcp_token": {
-      "type": "string",
-      "title": "MCP Server Bearer Token",
-      "description": "Bearer token for authenticating with the gotify-mcp server",
-      "sensitive": true
-    },
-    "gotify_url": {
-      "type": "string",
-      "title": "Gotify Server URL",
-      "description": "Base URL of your Gotify server",
-      "sensitive": true
-    },
-    "gotify_app_token": {
-      "type": "string",
-      "title": "Gotify App Token",
-      "description": "Application token for sending messages",
-      "sensitive": true
-    },
-    "gotify_client_token": {
-      "type": "string",
-      "title": "Gotify Client Token",
-      "description": "Client token for management operations",
-      "sensitive": true
-    }
-  }
-}
-```
 
 ## .env.example conventions
 

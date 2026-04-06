@@ -424,11 +424,22 @@ Responses are truncated at 512 KB. Truncated responses include `... [truncated]`
 
 ## Installation
 
-### Marketplace
+### Claude Code plugin (recommended)
+
+Install as a Claude Code plugin. You will be prompted for:
+- **Gotify Server URL** — base URL of your Gotify instance
+- **Gotify App Token** — for sending messages (from Gotify UI: Settings > Apps)
+- **Gotify Client Token** — for management operations (from Gotify UI: Settings > Clients)
+
+The plugin uses stdio transport with `${userConfig.*}` interpolation — no `.env` file needed.
+
+### Docker Compose
 
 ```bash
-/plugin marketplace add jmagar/claude-homelab
-/plugin install gotify-mcp @jmagar-claude-homelab
+cp .env.example .env
+chmod 600 .env
+# Edit .env with your credentials
+docker compose up -d
 ```
 
 ### Local development
@@ -438,53 +449,16 @@ uv sync --dev
 uv run gotify-mcp-server
 ```
 
-Direct module invocation:
-
-```bash
-uv run python -m gotify_mcp.server
-```
-
-### Docker
-
-```bash
-just up
-```
-
-Or manually:
-
-```bash
-docker compose up -d
-```
-
 ## Configuration
 
-Copy `.env.example` to `.env` and fill in the required values:
+Two deployment paths are supported:
 
-```bash
-cp .env.example .env
-```
+| Path | Transport | Credentials | Auth |
+|------|-----------|-------------|------|
+| **Plugin (stdio)** | stdio | `userConfig` in plugin settings | None |
+| **Docker (HTTP)** | http | `.env` file | Bearer token |
 
-### Environment variables
-
-| Variable | Required | Default | Description |
-| --- | --- | --- | --- |
-| `GOTIFY_URL` | yes | — | Base URL of your Gotify server (no trailing slash). Server exits at startup if unset. |
-| `GOTIFY_CLIENT_TOKEN` | yes* | — | Client token for management operations. Without this, all management actions fail. |
-| `GOTIFY_APP_TOKEN` | no | — | App token used in HTTP fallback examples. The MCP tool requires `app_token` per call. |
-| `GOTIFY_MCP_HOST` | no | `0.0.0.0` | Interface for the MCP HTTP server to bind to |
-| `GOTIFY_MCP_PORT` | no | `9158` | Port for the MCP HTTP server |
-| `GOTIFY_MCP_TRANSPORT` | no | `http` | Transport mode: `http` or `stdio` |
-| `GOTIFY_MCP_TOKEN` | yes** | — | Bearer token for MCP server authentication. Generate with `openssl rand -hex 32`. Required when transport is `http` and `GOTIFY_MCP_NO_AUTH` is not set. |
-| `GOTIFY_MCP_NO_AUTH` | no | `false` | Set `true` to disable bearer auth. Appropriate only behind a trusted reverse proxy. |
-| `GOTIFY_LOG_LEVEL` | no | `INFO` | Log level: `DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL` |
-| `ALLOW_DESTRUCTIVE` | no | `false` | Set `true` to skip `confirm=True` requirement for destructive actions |
-| `ALLOW_YOLO` | no | `false` | Identical to `ALLOW_DESTRUCTIVE` |
-| `PUID` | no | `1000` | User ID for container process |
-| `PGID` | no | `1000` | Group ID for container process |
-
-*`GOTIFY_CLIENT_TOKEN` is required for management actions. Without it, a warning is logged at startup and management actions return 401.
-
-**`GOTIFY_MCP_TOKEN` is required when `GOTIFY_MCP_TRANSPORT=http` and `GOTIFY_MCP_NO_AUTH=false`. The server exits at startup if neither is set.
+See [docs/CONFIG.md](docs/CONFIG.md) for the full environment variable reference.
 
 ### Docker URL rewriting
 
