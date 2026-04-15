@@ -9,7 +9,7 @@ gotify-mcp has two authentication boundaries:
 
 ## Inbound Authentication (Client to MCP Server)
 
-### Bearer Token
+Bearer Token
 
 All HTTP requests to the MCP server require a bearer token:
 
@@ -23,7 +23,7 @@ The token is set via the `GOTIFY_MCP_TOKEN` environment variable. Generate one w
 openssl rand -hex 32
 ```
 
-### BearerAuthMiddleware
+BearerAuthMiddleware
 
 The server validates inbound tokens using `BearerAuthMiddleware` with timing-safe comparison (`hmac.compare_digest`):
 
@@ -37,7 +37,7 @@ Request -> BearerAuthMiddleware -> Route Handler
 - Returns `401 Unauthorized` if the token is missing or does not match
 - Applies to all routes except `/health`
 
-### Unauthenticated Endpoints
+Unauthenticated Endpoints
 
 | Endpoint | Method | Purpose |
 |----------|--------|---------|
@@ -45,7 +45,7 @@ Request -> BearerAuthMiddleware -> Route Handler
 
 The health endpoint is intentionally unauthenticated so load balancers and monitoring can probe without credentials.
 
-### No-Auth Mode
+No-Auth Mode
 
 When running behind a reverse proxy that handles authentication:
 
@@ -55,13 +55,13 @@ GOTIFY_MCP_NO_AUTH=true
 
 This disables `BearerAuthMiddleware` entirely. Only use when the proxy enforces its own auth layer (e.g., SWAG with Authelia, Cloudflare Access).
 
-### stdio Transport
+stdio Transport
 
 stdio transport does not use bearer tokens. Process-level isolation provides the security boundary — only the parent process (Claude Desktop, Codex CLI) can communicate with the server.
 
 ## Outbound Authentication (MCP Server to Gotify)
 
-### Dual-Token Model
+Dual-Token Model
 
 Gotify uses the `X-Gotify-Key` header with two distinct token types:
 
@@ -76,7 +76,7 @@ The `GotifyClient` selects the appropriate token per request:
 
 Using the wrong token type produces a 401 from the upstream Gotify server.
 
-### No Auth Required
+No Auth Required
 
 Two upstream endpoints require no authentication:
 - `GET /health` — server health
@@ -98,7 +98,7 @@ When installed as a Claude Code plugin, credentials are managed via `userConfig`
 }
 ```
 
-Fields marked `sensitive: true` are stored encrypted and synced to `.env` by the `sync-env.sh` hook at session start.
+Fields marked `sensitive: true` are stored encrypted and synced to `.env` by the `sync-uv.sh` hook at session start.
 
 ## Security Best Practices
 

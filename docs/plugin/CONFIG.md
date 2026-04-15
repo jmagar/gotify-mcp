@@ -1,72 +1,61 @@
 # Plugin Settings — gotify-mcp
 
-Plugin configuration, user-facing settings, and environment sync.
+Plugin configuration and user-facing settings for Claude Code plugin deployment.
 
-## Configuration layers
+## How it works
 
-Settings flow through three layers with clear precedence:
+When installed as a Claude Code plugin, credentials flow through two files:
 
-| Priority | Source | Managed by |
-| --- | --- | --- |
-| 1 (highest) | `userConfig` in plugin.json | User at install time |
-| 2 | `.env` file | User or hooks |
-| 3 (lowest) | System environment variables | OS/container |
+1. **`plugin.json`** — declares `userConfig` fields that Claude Code prompts for at install time
+2. **`.mcp.json`** — references those fields as `${userConfig.<key>}` in the `env` section
 
-## userConfig
+```
+plugin.json userConfig (user enters values)
+  --> .mcp.json env (${userConfig.*} interpolated by Claude Code)
+    --> MCP server reads GOTIFY_URL, GOTIFY_CLIENT_TOKEN, etc.
+```
 
-User-facing configuration declared in `.claude-plugin/plugin.json`. Claude Code prompts the user for these values during plugin installation.
+No `.env` file or sync script is needed for plugin deployment. Claude Code handles interpolation directly.
+
+## userConfig fields
 
 | Key | Title | Sensitive | Purpose |
 | --- | --- | --- | --- |
-| `gotify_mcp_url` | Gotify MCP Server URL | no | Full MCP endpoint URL |
-| `gotify_mcp_token` | MCP Server Bearer Token | yes | Bearer token for MCP auth |
 | `gotify_url` | Gotify Server URL | yes | Base URL of Gotify server |
 | `gotify_app_token` | Gotify App Token | yes | App token for sending messages |
 | `gotify_client_token` | Gotify Client Token | yes | Client token for management |
 
-### Sensitive fields
+Sensitive fields are masked in the Claude Code UI, excluded from debug logs, and stored securely.
 
-Fields with `sensitive: true`:
-- Masked in Claude Code UI
-- Excluded from debug logs
-- Stored securely by Claude Code
-- Synced to `.env` by `sync-env.sh` hook
+## Defaults hardcoded in .mcp.json
 
-## Environment sync
+These values are set directly in `.mcp.json` and not exposed in userConfig:
 
-The `sync-env.sh` hook syncs `userConfig` values to `.env` at session start:
+| Variable | Value | Why |
+| --- | --- | --- |
+| `GOTIFY_MCP_TRANSPORT` | `stdio` | Plugin always uses stdio |
+| `GOTIFY_MCP_NO_AUTH` | `true` | No HTTP auth needed for stdio |
+| `GOTIFY_LOG_LEVEL` | `INFO` | Sensible default |
+| `ALLOW_DESTRUCTIVE` | `false` | Safety gate |
+
+## SessionStart hook
+
+The `sync-uv.sh` hook runs on session start to ensure Python dependencies are installed:
 
 ```
-userConfig (plugin.json)
-  --> sync-env.sh (SessionStart hook)
-    --> .env file (with file locking and backup)
-      --> MCP server reads GOTIFY_URL, GOTIFY_CLIENT_TOKEN, etc.
+hooks/hooks.json → bin/sync-uv.sh
+  --> uv sync --project ${CLAUDE_PLUGIN_ROOT}
+  --> venv at ${CLAUDE_PLUGIN_DATA}/.venv
 ```
 
-### sync-env.sh behavior
+This prevents cold-start delays from uv needing to build wheels on first tool call.
 
-1. Acquires file lock (10s timeout) to serialize concurrent sessions
-2. Backs up existing `.env` (keeps 3 most recent, chmod 600)
-3. Updates managed keys from `CLAUDE_PLUGIN_OPTION_*` env vars
-4. Preserves keys not in userConfig
-5. Validates `GOTIFY_MCP_TOKEN` is set (exits with error if not, unless `GOTIFY_MCP_NO_AUTH=true`)
-6. Sets `.env` to `chmod 600`
+## Docker deployment
 
-## .env conventions
-
-```bash
-# Service credentials
-GOTIFY_URL=https://gotify.example.com
-GOTIFY_CLIENT_TOKEN=your_client_token
-GOTIFY_APP_TOKEN=your_app_token
-
-# MCP server
-GOTIFY_MCP_PORT=9158
-GOTIFY_MCP_TOKEN=generated_token_here
-```
+For Docker Compose deployment, use `.env` file instead. See [CONFIG](../CONFIG.md) for full variable reference.
 
 ## Cross-references
 
-- [PLUGINS.md](PLUGINS.md) — Plugin manifest where userConfig is declared
-- [HOOKS.md](HOOKS.md) — Hooks that perform environment sync
-- See [CONFIG](../CONFIG.md) for full environment variable reference
+- [HOOKS.md](HOOKS.md) — Hook definitions
+- [CONFIG](../CONFIG.md) — Full environment variable reference
+- [ENV](../mcp/ENV.md) — Transport-specific variable details

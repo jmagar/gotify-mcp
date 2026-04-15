@@ -1,6 +1,6 @@
 {
   "name": "gotify-mcp",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "Gotify push notifications and management via MCP tools with HTTP fallback. Sends alerts for long-running tasks, plan completions, and blocked states.",
   "author": {
     "name": "Jacob Magar"
@@ -14,20 +14,8 @@
     "homelab",
     "mcp"
   ],
+  "mcpServers": "./.mcp.json",
   "userConfig": {
-    "gotify_mcp_url": {
-      "type": "string",
-      "title": "Gotify MCP Server URL",
-      "description": "Full MCP endpoint URL (e.g. http://localhost:9158/mcp). Default works if running via docker compose in this repo.",
-      "default": "https://gotify.tootie.tv/mcp",
-      "sensitive": false
-    },
-    "gotify_mcp_token": {
-      "type": "string",
-      "title": "MCP Server Bearer Token",
-      "description": "Bearer token for authenticating with the gotify-mcp server. Must match GOTIFY_MCP_TOKEN in .env. Generate with: openssl rand -hex 32",
-      "sensitive": true
-    },
     "gotify_url": {
       "type": "string",
       "title": "Gotify Server URL",

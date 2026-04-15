@@ -1,5 +1,16 @@
 # Environment Variable Reference
 
+## Deployment paths
+
+gotify-mcp supports two deployment models:
+
+| Path | Transport | Credentials | Auth |
+|------|-----------|-------------|------|
+| **Plugin (stdio)** | stdio | `${userConfig.*}` in `.mcp.json` | None (stdio) |
+| **Docker (HTTP)** | http | `.env` file | Bearer token |
+
+For plugin deployment, sensitive vars are interpolated from `userConfig` — see [Plugin CONFIG](../plugin/CONFIG.md).
+
 ## Upstream Service
 
 | Variable | Required | Default | Description | Sensitive |
@@ -48,7 +59,7 @@ Logs are written to `logs/gotify_mcp.log` with rotating file handler (5 MB max, 
 
 ## Token Generation
 
-Generate a secure MCP token:
+Generate a secure MCP token (Docker/HTTP deployment only):
 
 ```bash
 openssl rand -hex 32
@@ -56,16 +67,8 @@ openssl rand -hex 32
 
 Store the result in `GOTIFY_MCP_TOKEN` in your `.env` file.
 
-## Precedence
-
-Environment variables are resolved in order (first match wins):
-
-1. `.env` file (loaded by `python-dotenv` at startup)
-2. Container environment (`docker run -e` or `docker-compose.yml`)
-3. System environment (host shell)
-
 ## See Also
 
 - [AUTH.md](AUTH.md) — How tokens are used for authentication
 - [TRANSPORT.md](TRANSPORT.md) — Transport-specific variable usage
-- [../plugin/CONFIG.md](../plugin/CONFIG.md) — Plugin userConfig fields that sync to `.env`
+- [../plugin/CONFIG.md](../plugin/CONFIG.md) — Plugin userConfig fields

@@ -15,7 +15,7 @@ Runs on every push to `main` and on pull requests.
 | `test` | `uv sync --group dev` then `pytest` |
 | `audit` | `uv export --no-hashes \| uv pip compile - -q \| uv pip audit --stdin` |
 | `contract-drift` | `bash scripts/lint-plugin.sh` |
-| `docker-security` | `check-docker-security.sh`, `check-no-baked-env.sh`, `ensure-ignore-files.sh` |
+
 | `mcp-integration` | Runs `tests/test_live.sh --mode docker` with live Gotify credentials (main push only) |
 
 ### docker-publish.yml — Container Images

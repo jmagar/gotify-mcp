@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.3] - 2026-04-15
+
+### Changed
+- Repository maintenance updates committed from the current working tree.
+- Version-bearing manifests synchronized to 0.3.3.
+
+
 ## [0.3.2] - 2026-04-04
 
 ### Added
@@ -46,13 +53,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Action+subaction pattern for all Gotify operations
 - CLAUDE.md, AGENTS.md, GEMINI.md AI memory files
 - Multi-stage Dockerfile with non-root user (1000:1000)
-- ensure-ignore-files.sh hook for .gitignore and .dockerignore
+
 - .codex-plugin/plugin.json and .app.json for Codex CLI support
 - assets/ directory with icon and logo placeholders
 - gotify_mcp_token userConfig entry in plugin.json
 - .dockerignore with all required patterns
-- flock-based concurrency in sync-env.sh
-- awk-based env replacement in sync-env.sh
+- flock-based concurrency in sync-uv.sh
+- awk-based env replacement in sync-uv.sh
 
 ## [0.1.0] - 2026-03-29
 

@@ -24,7 +24,7 @@ gotify-mcp/
   tests/                     # Unit and integration tests
   scripts/                   # Smoke tests, contract checks, maintenance
   hooks/                     # Claude Code hooks (session start, post-tool)
-    scripts/                 # Hook scripts (sync-env, fix-perms, ensure-ignore)
+    scripts/                 # Hook scripts (sync-uv, fix-perms, ensure-ignore)
   skills/gotify/             # Skill definition (SKILL.md)
   .claude-plugin/            # Claude Code plugin manifest
   .codex-plugin/             # Codex CLI plugin manifest

@@ -1,67 +1,40 @@
-# Pre-commit Hook Configuration
+# Git Hook Configuration
 
-Hooks for `gotify-mcp` that run during Claude Code sessions and in CI.
+Git hooks for `gotify-mcp` plus the separate Claude Code session hooks used by the plugin.
 
-## Hook Architecture
+## Git hooks
 
-gotify-mcp uses Claude Code plugin hooks (defined in `hooks/hooks.json`) rather than traditional git pre-commit hooks. These run automatically during Claude Code sessions.
+`gotify-mcp` uses `lefthook.yml` for commit-time checks:
 
-## hooks.json
-
-```json
-{
-  "hooks": {
-    "SessionStart": [
-      {
-        "hooks": [
-          { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/sync-env.sh", "timeout": 10 },
-          { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/ensure-ignore-files.sh", "timeout": 5 }
-        ]
-      }
-    ],
-    "PostToolUse": [
-      {
-        "matcher": "Write|Edit|MultiEdit|Bash",
-        "hooks": [
-          { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/fix-env-perms.sh", "timeout": 5 }
-        ]
-      }
-    ]
-  }
-}
+```yaml
+pre-commit:
+  parallel: true
+  commands:
+    diff_check:
+      run: git diff --check --cached
+    yaml:
+      glob: "*.{yml,yaml}"
+      run: uv run python -c 'import sys, yaml; [yaml.safe_load(open(path, "r", encoding="utf-8")) for path in sys.argv[1:]]' {staged_files}
+    lint:
+      run: just lint
+    format:
+      run: just fmt
+    skills:
+      run: just validate-skills
+    env_guard:
+      run: bash bin/block-env-commits.sh
 ```
 
-## Hook Scripts
-
-All scripts live in `hooks/scripts/`. Each exits non-zero on failure.
-
-| Script | Trigger | Purpose |
-|--------|---------|---------|
-| `sync-env.sh` | SessionStart | Syncs `userConfig` credentials to `.env` with file locking and backup |
-| `ensure-ignore-files.sh` | SessionStart | Verifies `.gitignore` and `.dockerignore` contain required patterns |
-| `fix-env-perms.sh` | PostToolUse | Sets `.env` to `chmod 600` after any file write or shell command |
-
-## CI Enforcement
-
-The same security checks run in the `docker-security` CI job:
+Install and run:
 
 ```bash
-bash scripts/check-docker-security.sh Dockerfile
-bash scripts/check-no-baked-env.sh .
-bash scripts/ensure-ignore-files.sh --check .
+lefthook install
+lefthook run pre-commit
 ```
 
-Issues caught by hooks are also caught in CI even if a developer bypasses hooks.
+## Claude Code session hooks
 
-## CI Scripts
-
-| Script | Purpose |
-|--------|---------|
-| `scripts/lint-plugin.sh` | Validates plugin manifests (schema, required fields, version sync) |
-| `scripts/check-docker-security.sh` | Lints Dockerfile: non-root user, no secrets |
-| `scripts/check-no-baked-env.sh` | Ensures no `ENV` directives contain secrets |
-| `scripts/ensure-ignore-files.sh` | Verifies `.env` appears in ignore files |
-| `scripts/check-outdated-deps.sh` | Warns on outdated dependencies (advisory) |
+Claude Code plugin hooks remain defined in `hooks/hooks.json` and run automatically during Claude Code sessions.
 
 ## Related Docs
 

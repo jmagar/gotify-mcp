@@ -78,19 +78,19 @@ Complete listing of all plugin components.
 | Script | Location | Purpose |
 | --- | --- | --- |
 | `lint-plugin.sh` | `scripts/` | Validate plugin manifests and version sync |
-| `check-docker-security.sh` | `scripts/` | Lint Dockerfile for security issues |
-| `check-no-baked-env.sh` | `scripts/` | Verify no baked env vars in Docker image |
-| `ensure-ignore-files.sh` | `scripts/` | Confirm ignore files include required patterns |
-| `check-outdated-deps.sh` | `scripts/` | Report outdated dependencies |
+
+
+
+
 | `smoke-test.sh` | `scripts/` | Smoke test against running server |
 | `test_live.sh` | `tests/` | Live integration test suite |
-| `sync-env.sh` | `hooks/scripts/` | Sync userConfig to .env |
-| `fix-env-perms.sh` | `hooks/scripts/` | Enforce chmod 600 on .env |
-| `ensure-ignore-files.sh` | `hooks/scripts/` | Keep ignore files aligned |
+The `sync-uv.sh` hook keeps the repository lockfile and persistent Python environment in sync at session start.
+| `` | `bin/` | Enforce chmod 600 on .env |
+
 
 ## Dependencies
 
-### Runtime
+Runtime
 
 | Package | Version | Purpose |
 | --- | --- | --- |
@@ -98,7 +98,7 @@ Complete listing of all plugin components.
 | `httpx` | >=0.28.1 | Async HTTP client for Gotify API |
 | `python-dotenv` | >=1.1.0 | Environment variable loading |
 
-### Development
+Development
 
 | Package | Version | Purpose |
 | --- | --- | --- |
