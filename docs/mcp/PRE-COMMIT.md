@@ -1,65 +1,40 @@
-# Pre-commit Hook Configuration
+# Git Hook Configuration
 
-Hooks for `gotify-mcp` that run during Claude Code sessions and in CI.
+Git hooks for `gotify-mcp` plus the separate Claude Code session hooks used by the plugin.
 
-## Hook Architecture
+## Git hooks
 
-gotify-mcp uses Claude Code plugin hooks (defined in `hooks/hooks.json`) rather than traditional git pre-commit hooks. These run automatically during Claude Code sessions.
+`gotify-mcp` uses `lefthook.yml` for commit-time checks:
 
-## hooks.json
-
-```json
-{
-  "hooks": {
-    "SessionStart": [
-      {
-        "hooks": [
-          { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/bin/sync-uv.sh", "timeout": 10 },
-
-        ]
-      }
-    ],
-      {
-        "matcher": "Write|Edit|MultiEdit|Bash",
-        "hooks": [
-          { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/bin/", "timeout": 5 }
-        ]
-      }
-    ]
-  }
-}
+```yaml
+pre-commit:
+  parallel: true
+  commands:
+    diff_check:
+      run: git diff --check --cached
+    yaml:
+      glob: "*.{yml,yaml}"
+      run: uv run python -c 'import sys, yaml; [yaml.safe_load(open(path, "r", encoding="utf-8")) for path in sys.argv[1:]]' {staged_files}
+    lint:
+      run: just lint
+    format:
+      run: just fmt
+    skills:
+      run: just validate-skills
+    env_guard:
+      run: bash bin/block-env-commits.sh
 ```
 
-## Hook Scripts
-
-All scripts live in `bin/`. Each exits non-zero on failure.
-
-| Script | Trigger | Purpose |
-|--------|---------|---------|
-The `sync-uv.sh` hook keeps the repository lockfile and persistent Python environment in sync at session start.
-
-
-## CI Enforcement
-
-The same security checks run in the `docker-security` CI job:
+Install and run:
 
 ```bash
-
-
-
+lefthook install
+lefthook run pre-commit
 ```
 
-Issues caught by hooks are also caught in CI even if a developer bypasses hooks.
+## Claude Code session hooks
 
-## CI Scripts
-
-| Script | Purpose |
-|--------|---------|
-| `scripts/lint-plugin.sh` | Validates plugin manifests (schema, required fields, version sync) |
-
-
-
-
+Claude Code plugin hooks remain defined in `hooks/hooks.json` and run automatically during Claude Code sessions.
 
 ## Related Docs
 

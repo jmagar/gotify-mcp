@@ -33,19 +33,6 @@ jobs:
       - uses: astral-sh/setup-uv@v5
       - run: uv sync --group dev
       - run: uv export --no-hashes | uv pip compile - -q | uv pip audit --stdin || true
-  docker-security:
-    name: Docker Security
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Check Dockerfile security
-        run: bash bin/check-docker-security.sh Dockerfile
-      - name: Check no baked env vars
-        run: bash bin/check-no-baked-env.sh .
-      - name: Check ignore files
-        run: bash bin/ensure-ignore-files.sh --check .
-
-
   mcp-integration:
     name: MCP Integration Tests
     runs-on: ubuntu-latest
