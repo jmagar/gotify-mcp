@@ -658,3 +658,7 @@ The server writes rotating logs to `logs/gotify_mcp.log` (max 5 MB, 3 backups). 
 ## License
 
 MIT
+
+## Download History
+
+[![Download History](https://skill-history.com/chart/jmagar/gotify.svg)](https://skill-history.com/jmagar/gotify)
